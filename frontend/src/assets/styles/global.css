@@ -1,0 +1,47 @@
+@import './variables.css';
+
+body {
+  min-height: 100vh;
+  overflow-x:hidden;
+
+  color: var(--color-brown-900);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 220, 156, 0.45),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      #fff3da 0%,
+      #fff9ed 60%,
+      #fff5e3 100%
+    );
+
+  font-family:
+    Pretendard,
+    'Noto Sans KR',
+    Arial,
+    sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+button,
+input {
+  color: inherit;
+}
+
+.page-container {
+  width: min(var(--page-width), calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.serif-title {
+  font-family:
+    'Noto Serif KR',
+    Georgia,
+    serif;
+}
