@@ -1,4 +1,6 @@
 <template>
+  <RouterView />
+</template>
   <header class="header">
     <div class="header-inner">
       <span class="logo" @click="$router.push('/board')">LocalHub</span>
