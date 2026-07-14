@@ -11,9 +11,11 @@ uvicorn main:app --reload --port 8000
 ```
 
 ### Frontend
+```
 cd frontend
 npm install
 npm run dev
+```
 
 ## 접속
 - Backend: http://localhost:8000/docs
