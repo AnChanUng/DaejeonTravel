@@ -1,0 +1,22 @@
+:root {
+  --color-brown-900: #3f2819;
+  --color-brown-800: #4b2f1d;
+  --color-brown-700: #69452d;
+  --color-brown-500: #927056;
+
+  --color-gold-500: #e8a52a;
+  --color-gold-400: #f3b940;
+  --color-gold-300: #ffd064;
+
+  --color-cream-100: #fffdf8;
+  --color-cream-200: #fff9ed;
+  --color-cream-300: #fff1d6;
+
+  --color-border: #e8cfaa;
+  --color-border-dark: #dbb87e;
+
+  --shadow-small: 0 6px 18px rgba(75, 44, 20, 0.1);
+  --shadow-medium: 0 12px 30px rgba(75, 44, 20, 0.14);
+
+  --page-width: 1380px;
+}
