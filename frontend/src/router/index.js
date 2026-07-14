@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-
 import HomeView from "../views/HomeView.vue";
 
 const TemporaryView = {
@@ -70,6 +69,17 @@ const routes = [
     path: "/search",
     component: TemporaryView,
   },
+import BoardList from "../views/BoardList.vue";
+import BoardDetail from "../views/BoardDetail.vue";
+import BoardWrite from "../views/BoardWrite.vue";
+import BoardEdit from "../views/BoardEdit.vue";
+
+const routes = [
+  { path: "/", redirect: "/board" },
+  { path: "/board", name: "BoardList", component: BoardList },
+  { path: "/board/write", name: "BoardWrite", component: BoardWrite },
+  { path: "/board/:id", name: "BoardDetail", component: BoardDetail },
+  { path: "/board/:id/edit", name: "BoardEdit", component: BoardEdit },
 ];
 
 const router = createRouter({
