@@ -1,5 +1,6 @@
 <template>
   <div>
+    <WeatherWidget style="margin-bottom: 20px" />
     <div class="page-head">
       <h1>커뮤니티</h1>
       <p class="sub">대전·충청 지역 이야기를 나눠보세요</p>
@@ -57,6 +58,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../api";
 import BaseButton from "../components/BaseButton.vue";
+import WeatherWidget from "../components/WeatherWidget.vue";
 
 const router = useRouter();
 const posts = ref([]);
