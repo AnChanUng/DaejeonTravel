@@ -1,37 +1,68 @@
 <script setup>
-import { ref } from 'vue'
-
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import kkumsuniImage from '../../assets/images/mascots/kkumsuni.png'
 
 const chatbotOpen = ref(false)
+const widgetBottom = ref(24)
 
-const toggleChatbot = () => {
+const DEFAULT_BOTTOM = 24
+const FOOTER_GAP = 20
+
+const toggleChatbot = async () => {
   chatbotOpen.value = !chatbotOpen.value
+
+  await nextTick()
+  updateChatbotPosition()
 }
+
+const updateChatbotPosition = () => {
+  const footer = document.querySelector('.app-footer')
+
+  if (!footer) {
+    widgetBottom.value = DEFAULT_BOTTOM
+    return
+  }
+
+  const footerRect = footer.getBoundingClientRect()
+  const footerVisibleHeight = window.innerHeight - footerRect.top
+
+  if (footerVisibleHeight > 0) {
+    widgetBottom.value = footerVisibleHeight + FOOTER_GAP
+  } else {
+    widgetBottom.value = DEFAULT_BOTTOM
+  }
+}
+
+onMounted(() => {
+  updateChatbotPosition()
+
+  window.addEventListener('scroll', updateChatbotPosition, {
+    passive: true
+  })
+
+  window.addEventListener('resize', updateChatbotPosition)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateChatbotPosition)
+  window.removeEventListener('resize', updateChatbotPosition)
+})
 </script>
 
-
 <template>
-  <div class="chatbot-widget">
-
-    <!-- 채팅창 -->
+  <div
+    class="chatbot-widget"
+    :style="{ bottom: `${widgetBottom}px` }"
+  >
     <div
       v-if="chatbotOpen"
       class="chatbot-widget__panel"
     >
-
       <header class="chatbot-widget__header">
-
         <div>
-          <strong>
-            대전 여행 도우미
-          </strong>
-
-          <span>
-            관광지·음식점·숙박을 물어보세요.
-          </span>
+          <strong>대전 여행 도우미</strong>
+          <span>관광지·음식점·숙박을 물어보세요.</span>
         </div>
-
 
         <button
           type="button"
@@ -40,610 +71,296 @@ const toggleChatbot = () => {
         >
           ×
         </button>
-
       </header>
 
-
-
       <div class="chatbot-widget__body">
-
         <div class="chatbot-widget__message">
           안녕하세요! 궁금한 대전 정보를 물어보세요.
         </div>
 
-
         <div class="chatbot-widget__suggestions">
-
-          <button>
+          <button type="button">
             유성구 관광지를 알려줘
           </button>
 
-
-          <button>
+          <button type="button">
             대전역 근처 음식점 찾아줘
           </button>
 
-
-          <button>
+          <button type="button">
             서구 숙박시설을 알려줘
           </button>
-
         </div>
-
       </div>
-
-
 
       <form
         class="chatbot-widget__input"
         @submit.prevent
       >
-
         <input
           type="text"
           placeholder="메시지를 입력하세요"
         >
 
-
-        <button>
+        <button type="submit">
           전송
         </button>
-
-
       </form>
-
     </div>
 
-
-
-    <!-- 챗봇 버튼 -->
     <button
       type="button"
       class="chatbot-widget__button"
       :aria-expanded="chatbotOpen"
+      aria-label="챗봇 열기"
       @click="toggleChatbot"
     >
-
       <img
         :src="kkumsuniImage"
         alt=""
       >
 
-
       <span>
         챗봇에게<br>
         물어보기
       </span>
-
-
     </button>
-
-
   </div>
 </template>
 
-
-
 <style scoped>
-
-
 .chatbot-widget {
-
-  position:fixed;
-
-  right:30px;
-
-  bottom:90px;
-
-  z-index:100;
-
+  position: fixed;
+  right: 30px;
+  z-index: 100;
 }
 
-
-
-
-
-/* =========================
-   버튼
-========================= */
-
+/* 버튼 */
 
 .chatbot-widget__button {
+  min-width: 160px;
+  min-height: 70px;
+  padding: 8px 20px 8px 12px;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-  min-width:160px;
-
-  min-height:70px;
-
-
-  padding:8px 20px 8px 12px;
-
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:10px;
-
-
-
-  background:linear-gradient(
+  background: linear-gradient(
     135deg,
     #ffe381,
     #ffc43f
   );
 
-
-  border:1px solid #e5a725;
-
-
-  border-radius:999px;
-
+  border: 1px solid #e5a725;
+  border-radius: 999px;
 
   box-shadow:
+    0 12px 25px rgba(107, 68, 22, 0.19);
 
-  0 12px 25px rgba(107,68,22,.19);
+  color: var(--color-brown-900);
+  font-weight: 800;
+  cursor: pointer;
 
-
-  color:var(--color-brown-900);
-
-
-  font-weight:800;
-
-
-  cursor:pointer;
-
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
+.chatbot-widget__button:hover {
+  transform: translateY(-2px);
 
+  box-shadow:
+    0 15px 30px rgba(107, 68, 22, 0.24);
+}
 
 .chatbot-widget__button img {
-
-
-  width:52px;
-
-  height:52px;
-
-
-  object-fit:contain;
-
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
 }
-
-
 
 .chatbot-widget__button span {
-
-
-  line-height:1.3;
-
+  line-height: 1.3;
 }
 
-
-
-
-
-/* =========================
-   채팅창
-========================= */
-
+/* 채팅창 */
 
 .chatbot-widget__panel {
+  position: absolute;
+  right: 0;
+  bottom: 82px;
 
+  width: 350px;
+  height: 470px;
 
-  position:absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
-
-  right:0;
-
-
-  bottom:82px;
-
-
-
-  width:350px;
-
-
-  height:470px;
-
-
-
-  display:flex;
-
-
-  flex-direction:column;
-
-
-
-  overflow:hidden;
-
-
-
-  background:white;
-
-
-
-  border:1px solid var(--color-border);
-
-
-  border-radius:20px;
-
-
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
 
   box-shadow:
-
-  0 18px 45px rgba(67,39,16,.23);
-
-
+    0 18px 45px rgba(67, 39, 16, 0.23);
 }
-
-
-
-
 
 .chatbot-widget__header {
+  padding: 16px 18px;
 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  padding:16px 18px;
-
-
-
-  display:flex;
-
-
-  align-items:center;
-
-
-  justify-content:space-between;
-
-
-
-  background:#f4ad35;
-
-
+  background: #f4ad35;
 }
-
-
 
 .chatbot-widget__header strong,
 .chatbot-widget__header span {
-
-
-  display:block;
-
-
+  display: block;
 }
 
-
+.chatbot-widget__header strong {
+  color: var(--color-brown-900);
+}
 
 .chatbot-widget__header span {
-
-
-  margin-top:3px;
-
-
-  font-size:12px;
-
-
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--color-brown-800);
 }
-
-
 
 .chatbot-widget__header button {
+  padding: 0;
 
+  background: transparent;
+  border: 0;
 
-  background:transparent;
-
-
-  border:0;
-
-
-  font-size:27px;
-
-
-  cursor:pointer;
-
+  color: var(--color-brown-900);
+  font-size: 27px;
+  line-height: 1;
+  cursor: pointer;
 }
 
-
-
-
-
-/* =========================
-   내용
-========================= */
-
+/* 채팅 내용 */
 
 .chatbot-widget__body {
-
-
-  flex:1;
-
-
-  padding:18px;
-
-
-
-  overflow-y:auto;
-
-
-
-  background:#fffaf1;
-
-
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  background: #fffaf1;
 }
-
-
 
 .chatbot-widget__message {
+  max-width: 85%;
+  padding: 12px 14px;
 
+  background: #ffffff;
+  border-radius: 4px 15px 15px;
+  box-shadow: var(--shadow-small);
 
-  max-width:85%;
-
-
-
-  padding:12px 14px;
-
-
-
-  background:white;
-
-
-
-  border-radius:
-
-  4px 15px 15px;
-
-
-
-  box-shadow:
-
-  var(--shadow-small);
-
-
-
-  font-size:14px;
-
-
-
-  line-height:1.6;
-
-
+  font-size: 14px;
+  line-height: 1.6;
 }
-
-
-
 
 .chatbot-widget__suggestions {
+  margin-top: 18px;
 
-
-  margin-top:18px;
-
-
-
-  display:flex;
-
-
-  flex-direction:column;
-
-
-
-  gap:8px;
-
-
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-
-
 
 .chatbot-widget__suggestions button {
+  padding: 10px 12px;
 
+  background: #fff1cf;
+  border: 1px solid #e5c085;
+  border-radius: 10px;
 
-  padding:10px 12px;
+  color: var(--color-brown-900);
+  text-align: left;
+  font-size: 13px;
 
-
-
-  background:#fff1cf;
-
-
-
-  border:1px solid #e5c085;
-
-
-
-  border-radius:10px;
-
-
-
-  text-align:left;
-
-
-
-  font-size:13px;
-
-
-
-  cursor:pointer;
-
-
+  cursor: pointer;
 }
 
+.chatbot-widget__suggestions button:hover {
+  background: #ffe8b5;
+}
 
-
-
-
-/* =========================
-   입력창
-========================= */
-
+/* 입력창 */
 
 .chatbot-widget__input {
+  padding: 12px;
 
+  display: flex;
+  gap: 8px;
 
-  padding:12px;
-
-
-
-  display:flex;
-
-
-
-  gap:8px;
-
-
-
-  border-top:1px solid var(--color-border);
-
-
+  background: #ffffff;
+  border-top: 1px solid var(--color-border);
 }
-
-
 
 .chatbot-widget__input input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
 
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
 
-  flex:1;
-
-
-  min-width:0;
-
-
-
-  padding:10px;
-
-
-
-  border:1px solid var(--color-border);
-
-
-
-  border-radius:9px;
-
-
-
-  outline:0;
-
-
+  outline: none;
 }
 
-
+.chatbot-widget__input input:focus {
+  border-color: var(--color-gold-500);
+}
 
 .chatbot-widget__input button {
+  padding: 0 15px;
 
+  background: var(--color-gold-500);
+  border: 0;
+  border-radius: 9px;
 
-  padding:0 15px;
+  color: var(--color-brown-900);
+  font-weight: 700;
 
-
-
-  background:var(--color-gold-500);
-
-
-
-  border:0;
-
-
-
-  border-radius:9px;
-
-
-
-  font-weight:700;
-
-
-
-  cursor:pointer;
-
-
+  cursor: pointer;
 }
 
+/* 모바일 */
 
-
-
-
-/* =========================
-   모바일
-========================= */
-
-
-@media(max-width:600px){
-
-
+@media (max-width: 600px) {
   .chatbot-widget {
-
-
-    right:15px;
-
-
-    bottom:75px;
-
-
+    right: 15px;
   }
-
-
 
   .chatbot-widget__button {
-
-
-    min-width:64px;
-
-
-    min-height:64px;
-
-
-    padding:5px;
-
-
+    min-width: 64px;
+    min-height: 64px;
+    padding: 5px;
   }
-
-
 
   .chatbot-widget__button img {
-
-
-    width:52px;
-
-
-    height:52px;
-
-
+    width: 52px;
+    height: 52px;
   }
-
-
 
   .chatbot-widget__button span {
-
-
-    display:none;
-
-
+    display: none;
   }
-
-
 
   .chatbot-widget__panel {
+    position: fixed;
+    inset: 12px;
 
+    width: auto;
+    height: auto;
 
-    position:fixed;
-
-
-    inset:0;
-
-
-
-    width:auto;
-
-
-    height:auto;
-
-
-
-    border-radius:0;
-
-
+    border-radius: 16px;
   }
-
-
 }
-
-
 </style>
