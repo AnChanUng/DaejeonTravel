@@ -15,6 +15,22 @@ STOPWORDS = {
     "싶어", "싶은데", "해줘", "줘", "요", "?", ".", ",", "!"
 }
 
+LOCATION_ALIAS = {
+    # 주요 역
+    "대전역": "중동",
+    "서대전역": "오류동",
+    "신탄진역": "신탄진동",
+
+    # 터미널
+    "대전복합터미널": "용전동",
+    "유성터미널": "구암동",
+
+    # 유명 장소
+    "성심당": "은행동",
+    "한밭수목원": "만년동",
+    "오월드": "산성동",
+}
+
 def extract_keywords(question: str) -> list[str]:
     """
     질문 문장에서 검색에 사용할 키워드를 추출한다.
@@ -63,6 +79,17 @@ DATA = {
     for key, file in DATA_FILES.items()
 }
 
+def replace_location_alias(question: str) -> str:
+    """
+    사용자가 입력한 유명 장소명을
+    검색 가능한 행정구역으로 변환
+    """
+
+    for alias, region in LOCATION_ALIAS.items():
+        question = question.replace(alias, region)
+
+    return question
+
 def select_dataset(question: str):
     question = question.strip()
 
@@ -72,7 +99,7 @@ def select_dataset(question: str):
         return "음식점"
 
     if any(keyword in question for keyword in [
-        "숙박", "호텔", "펜션", "모텔", "게스트하우스"
+        "숙박", "호텔", "펜션", "모텔", "게스트하우스", "숙소", "숙박시설"
     ]):
         return "숙박"
 
@@ -108,8 +135,11 @@ def search_data(dataset: str, question: str, limit=5):
             scored.append((score, item))
 
     scored.sort(reverse=True, key=lambda x: x[0])
-
-    return [item for _, item in scored[:limit]]
+    
+    if scored:
+        return [item for _, item in scored[:limit]]
+    
+    return items[:limit]
 
 def build_context(results):
     """
@@ -167,21 +197,24 @@ def ask_chatbot(question: str):
     3. Context 생성
     4. Gemini에게 전달
     """
+    original_question = question
 
-    dataset = select_dataset(question)
+    search_question = replace_location_alias(question)
 
-    results = search_data(dataset, question)
+    dataset = select_dataset(search_question)
+
+    results = search_data(dataset, search_question)
 
     if not results:
         return "제공된 데이터에서 관련 정보를 찾을 수 없습니다."
 
     context = build_context(results)
 
-    prompt = build_prompt(question, context)
+    prompt = build_prompt(original_question, context)
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="models/gemini-3.1-flash-lite",
             contents=prompt,
         )
 
