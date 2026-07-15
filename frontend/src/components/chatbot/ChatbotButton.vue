@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import kkumsuniImage from '../../assets/images/mascots/kkumsuni.png'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const chatbotOpen = ref(false)
 const widgetBottom = ref(24)
@@ -60,13 +63,14 @@ onUnmounted(() => {
     >
       <header class="chatbot-widget__header">
         <div>
-          <strong>대전 여행 도우미</strong>
-          <span>관광지·음식점·숙박을 물어보세요.</span>
+          <strong>{{ t('chatbot.title') }}</strong>
+
+          <span>{{ t('chatbot.description') }}</span>
         </div>
 
         <button
           type="button"
-          aria-label="챗봇 닫기"
+          :aria-label="t('chatbot.close')"
           @click="toggleChatbot"
         >
           ×
@@ -75,20 +79,20 @@ onUnmounted(() => {
 
       <div class="chatbot-widget__body">
         <div class="chatbot-widget__message">
-          안녕하세요! 궁금한 대전 정보를 물어보세요.
+          {{ t('chatbot.greeting') }}
         </div>
 
         <div class="chatbot-widget__suggestions">
           <button type="button">
-            유성구 관광지를 알려줘
+            {{ t('chatbot.suggestion1') }}
           </button>
 
           <button type="button">
-            대전역 근처 음식점 찾아줘
+            {{ t('chatbot.suggestion2') }}
           </button>
 
           <button type="button">
-            서구 숙박시설을 알려줘
+            {{ t('chatbot.suggestion3') }}
           </button>
         </div>
       </div>
@@ -99,11 +103,11 @@ onUnmounted(() => {
       >
         <input
           type="text"
-          placeholder="메시지를 입력하세요"
+          :placeholder="t('chatbot.placeholder')"
         >
 
         <button type="submit">
-          전송
+          {{ t('chatbot.send') }}
         </button>
       </form>
     </div>
@@ -112,7 +116,7 @@ onUnmounted(() => {
       type="button"
       class="chatbot-widget__button"
       :aria-expanded="chatbotOpen"
-      aria-label="챗봇 열기"
+      :aria-label="t('chatbot.open')"
       @click="toggleChatbot"
     >
       <img
@@ -120,10 +124,9 @@ onUnmounted(() => {
         alt=""
       >
 
-      <span>
-        챗봇에게<br>
-        물어보기
-      </span>
+        <span class="chatbot-text">
+          {{ t('chatbot.ask') }}
+        </span>
     </button>
   </div>
 </template>
@@ -133,6 +136,10 @@ onUnmounted(() => {
   position: fixed;
   right: 30px;
   z-index: 100;
+}
+
+.chatbot-text {
+  white-space: pre-line;
 }
 
 /* 버튼 */

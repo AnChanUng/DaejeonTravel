@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppFooter from '../components/layout/AppFooter.vue'
@@ -14,81 +14,54 @@ import hanbatImage from '../assets/images/places/hanbat.jpg'
 import expoImage from '../assets/images/places/expo.jpg'
 import uamImage from '../assets/images/places/uam.jpg'
 
+import { useI18n } from 'vue-i18n'
+
 import daejeonLineImage from '../assets/images/backgrounds/daejeon-line.png'
 
+const { t } = useI18n()
 
-const touristSpots = ref([
+const touristSpots = computed(() => [
   {
     id: 1,
-    name: '한밭수목원',
-    category: '관광지',
-    district: '서구',
-    description:
-      '사계절 아름다운 자연을 만날 수 있는 도심 속 힐링 공간',
+    name: t('places.hanbat.name'),
+    category: t('places.category'),
+    district: t('places.seogu'),
+    description: t('places.hanbat.description'),
     imageUrl: hanbatImage
   },
   {
     id: 2,
-    name: '엑스포시민광장',
-    category: '관광지',
-    district: '유성구',
-    description:
-      '한빛탑과 엑스포다리를 함께 볼 수 있는 대전의 대표 공간',
+    name: t('places.expo.name'),
+    category: t('places.category'),
+    district: t('places.yuseonggu'),
+    description: t('places.expo.description'),
     imageUrl: expoImage
   },
   {
     id: 3,
-    name: '우암사적공원',
-    category: '관광지',
-    district: '동구',
-    description:
-      '역사적인 건축물과 아름다운 자연이 어우러진 전통문화 공간',
+    name: t('places.uam.name'),
+    category: t('places.category'),
+    district: t('places.donggu'),
+    description: t('places.uam.description'),
     imageUrl: uamImage
   },
-  {
+    {
     id: 4,
-    name: '대청호 오백리길',
-    category: '관광지',
-    district: '대덕구',
-    description:
-      '대청호의 풍경을 따라 걷는 대전 대표 생태 탐방길',
+    name: t('places.daechung.name'),
+    category: t('places.category'),
+    district: t('places.daedeokgu'),
+    description: t('places.daechung.description'),
     imageUrl: hanbatImage
   },
   {
     id: 5,
-    name: '유성온천',
-    category: '관광지',
-    district: '유성구',
-    description:
-      '대전을 대표하는 온천 관광지에서 편안한 휴식을 즐겨보세요',
+    name: t('places.yuseong.name'),
+    category: t('places.category'),
+    district: t('places.yuseonggu'),
+    description: t('places.yuseong.description'),
     imageUrl: expoImage
   }
 ])
-
-
-const recentPosts = ref([
-  {
-    id: 1,
-    title: '성심당 신상 빵 먹어봤어요! 역시 명불허전',
-    createdAt: '07.14'
-  },
-  {
-    id: 2,
-    title: '대청호 오백리길 걷기 좋은 코스 추천드립니다',
-    createdAt: '07.13'
-  },
-  {
-    id: 3,
-    title: '유성온천에서 힐링하고 왔어요',
-    createdAt: '07.12'
-  },
-  {
-    id: 4,
-    title: '이번 주말 부모님과 갈 만한 곳이 있을까요?',
-    createdAt: '07.11'
-  }
-])
-
 </script>
 
 

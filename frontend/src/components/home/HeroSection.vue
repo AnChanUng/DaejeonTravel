@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import kkumdoriImage from '@/assets/images/mascots/kkumdori.png'
 import kkumsuniImage from '@/assets/images/mascots/kkumsuni.png'
@@ -9,6 +10,7 @@ import daejeonRightImage from '@/assets/images/backgrounds/daejeon-right.png'
 
 
 const router = useRouter()
+const { t, locale } = useI18n()
 
 const keyword = ref('')
 
@@ -76,13 +78,14 @@ const handleSearch = () => {
       </span>
 
 
-      <h1>
-        대전의 맛과 여행을 한눈에
+      <h1
+        :class="{ english: locale === 'en' }"
+      >
+        {{ t('hero.title') }}
       </h1>
 
-
       <p>
-        관광지, 음식점, 숙박 정보를 쉽고 빠르게 찾아보세요!
+        {{ t('hero.description') }}
       </p>
 
 
@@ -95,7 +98,7 @@ const handleSearch = () => {
         <input
           v-model="keyword"
           type="search"
-          placeholder="장소 이름을 검색해보세요. 예: 한밭수목원, 유성온천"
+          :placeholder="t('hero.placeholder')"
         />
 
 
