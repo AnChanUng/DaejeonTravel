@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from config import settings
 from database import engine, Base
 from models import Post
-from routers import posts, weather, locations, festivals, stats
+from routers import posts, weather, locations, festivals, stats, chat
 
 Base.metadata.create_all(bind=engine)   # posts 테이블 없으면 생성
 
@@ -27,6 +27,7 @@ app.include_router(posts.router)
 app.include_router(weather.router)
 app.include_router(locations.router)
 app.include_router(festivals.router)
+app.include_router(chat.router)
 app.include_router(stats.router)
 
 @app.get("/")
