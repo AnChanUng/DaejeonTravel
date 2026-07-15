@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   spot: {
     type: Object,
@@ -31,7 +35,7 @@ defineProps({
         :to="`/tourist-spots/${spot.id}`"
         class="tourist-card__detail-button"
       >
-        자세히 보기
+        {{ t('common.detail') }}
         <span aria-hidden="true">→</span>
       </RouterLink>
     </div>

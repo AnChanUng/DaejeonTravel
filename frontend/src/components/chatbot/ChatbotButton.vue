@@ -1,5 +1,9 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import kkumsuniImage from '../../assets/images/mascots/kkumsuni.png'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 import { sendMessage } from "@/api/chatbot";
 
@@ -58,33 +62,36 @@ const handleSuggestion = async (question) => {
     <div v-if="chatbotOpen" class="chatbot-widget__panel">
       <header class="chatbot-widget__header">
         <div>
-          <strong> 대전 여행 도우미 </strong>
+          <strong>{{ t('chatbot.title') }}</strong>
 
-          <span> 관광지·음식점·숙박을 물어보세요. </span>
+          <span>{{ t('chatbot.description') }}</span>
         </div>
 
-        <button type="button" aria-label="챗봇 닫기" @click="toggleChatbot">×</button>
+        <button
+          type="button"
+          :aria-label="t('chatbot.close')"
+          @click="toggleChatbot"
+        >
+          ×
+        </button>
       </header>
 
       <div class="chatbot-widget__body">
-        <!-- 처음 인사말 -->
-        <div class="chat-message chat-message--bot">
-          안녕하세요! 👋<br />
-          궁금한 대전 정보를 물어보세요.
+        <div class="chatbot-widget__message">
+          {{ t('chatbot.greeting') }}
         </div>
 
-        <!-- 추천 질문 (대화 시작 전만 표시) -->
-        <div v-if="messages.length === 1" class="chatbot-widget__suggestions">
-          <button type="button" @click="handleSuggestion('유성구 관광지를 알려줘')">
-            유성구 관광지를 알려줘
+        <div class="chatbot-widget__suggestions">
+          <button type="button">
+            {{ t('chatbot.suggestion1') }}
           </button>
 
-          <button type="button" @click="handleSuggestion('대전역 근처 음식점 찾아줘')">
-            대전역 근처 음식점 찾아줘
+          <button type="button">
+            {{ t('chatbot.suggestion2') }}
           </button>
 
-          <button type="button" @click="handleSuggestion('서구 숙박시설을 알려줘')">
-            서구 숙박시설을 알려줘
+          <button type="button">
+            {{ t('chatbot.suggestion3') }}
           </button>
         </div>
 
@@ -105,11 +112,12 @@ const handleSuggestion = async (question) => {
         <input
           v-model="input"
           type="text"
-          placeholder="메시지를 입력하세요"
-          @keyup.enter="handleSend"
-        />
+          :placeholder="t('chatbot.placeholder')"
+        >
 
-        <button type="submit">전송</button>
+        <button type="submit">
+          {{ t('chatbot.send') }}
+        </button>
       </form>
     </div>
 
@@ -118,15 +126,14 @@ const handleSuggestion = async (question) => {
       type="button"
       class="chatbot-widget__button"
       :aria-expanded="chatbotOpen"
-      aria-label="챗봇 열기"
+      :aria-label="t('chatbot.open')"
       @click="toggleChatbot"
     >
       <img :src="kkumsuniImage" alt="" />
 
-      <span>
-        챗봇에게<br />
-        물어보기
-      </span>
+        <span class="chatbot-text">
+          {{ t('chatbot.ask') }}
+        </span>
     </button>
   </div>
 </template>
@@ -142,9 +149,11 @@ const handleSuggestion = async (question) => {
   z-index: 100;
 }
 
-/* =========================
-   버튼
-========================= */
+.chatbot-text {
+  white-space: pre-line;
+}
+
+/* 버튼 */
 
 .chatbot-widget__button {
   min-width: 160px;

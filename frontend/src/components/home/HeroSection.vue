@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '../../api'
 
 import kkumdoriImage from '@/assets/images/mascots/kkumdori.png'
@@ -9,6 +10,7 @@ import bakeryImage from '@/assets/images/backgrounds/bakery-left.png'
 import daejeonRightImage from '@/assets/images/backgrounds/daejeon-right.png'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 
 const keyword = ref('')
 const suggestions = ref([])
@@ -81,36 +83,15 @@ const moveToDetail = async (location) => {
 const handleSearch = async () => {
   const value = keyword.value.trim()
 
-  if (!value) {
-    searchError.value = '장소 이름을 입력해주세요.'
-    return
-  }
+      <h1
+        :class="{ english: locale === 'en' }"
+      >
+        {{ t('hero.title') }}
+      </h1>
 
-  if (searching.value) {
-    return
-  }
-
-  searching.value = true
-  searchError.value = ''
-  suggestionOpen.value = false
-
-  try {
-    const response = await api.get('/api/locations/exact', {
-      params: {
-        keyword: value
-      }
-    })
-    await moveToDetail(response.data)
-  } catch (error) {
-    if (error.response?.status === 404) {
-    } else {
-      searchError.value = '검색 중 오류가 발생했습니다.'
-      console.error('장소 정확 검색 실패:', error)
-    }
-  } finally {
-    searching.value = false
-  }
-}
+      <p>
+        {{ t('hero.description') }}
+      </p>
 
 const selectSuggestion = async (location) => {
   keyword.value = location.title ?? location.name ?? ''
@@ -125,11 +106,11 @@ const closeSuggestions = () => {
   }, 150)
 }
 
-const openSuggestions = () => {
-  if (keyword.value.trim()) {
-    suggestionOpen.value = true
-  }
-}
+        <input
+          v-model="keyword"
+          type="search"
+          :placeholder="t('hero.placeholder')"
+        />
 
 watch(keyword, (newKeyword) => {
   window.clearTimeout(debounceTimer)

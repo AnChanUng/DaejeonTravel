@@ -1,8 +1,16 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+
+const { locale } = useI18n()
 
 const languageMenuOpen = ref(false)
-const currentLanguage = ref('KO')
+
+const currentLanguage = ref(
+  locale.value.toUpperCase()
+)
+
 
 const languages = [
   {
@@ -15,14 +23,28 @@ const languages = [
   }
 ]
 
+
 const toggleLanguageMenu = () => {
   languageMenuOpen.value = !languageMenuOpen.value
 }
 
+
 const selectLanguage = (languageCode) => {
+
   currentLanguage.value = languageCode
+
+  // 실제 언어 변경
+  locale.value = languageCode.toLowerCase()
+
+  // 새로고침 후 유지
+  localStorage.setItem(
+    'language',
+    languageCode.toLowerCase()
+  )
+
   languageMenuOpen.value = false
 }
+
 </script>
 
 <template>
@@ -33,42 +55,42 @@ const selectLanguage = (languageCode) => {
           to="/"
           exact-active-class="app-header__link--active"
         >
-          홈
+          {{ $t('home') }}
         </RouterLink>
 
         <RouterLink
           to="/tourist-spots"
           active-class="app-header__link--active"
         >
-          관광지
+          {{ $t('tourist') }}
         </RouterLink>
 
         <RouterLink
           to="/restaurants"
           active-class="app-header__link--active"
         >
-          음식점
+          {{ $t('restaurant') }}
         </RouterLink>
 
         <RouterLink
           to="/accommodations"
           active-class="app-header__link--active"
         >
-          숙박
+          {{ $t('accommodation') }}
         </RouterLink>
 
         <RouterLink
           to="/festivals"
           active-class="app-header__link--active"
         >
-          축제 캘린더
+          {{ $t('festival') }}
         </RouterLink>
 
         <RouterLink
           to="/community"
           active-class="app-header__link--active"
         >
-          커뮤니티
+          {{ $t('community') }}
         </RouterLink>
 
         <RouterLink
@@ -140,7 +162,7 @@ const selectLanguage = (languageCode) => {
       <button
         type="button"
         class="app-header__mobile-menu"
-        aria-label="메뉴 열기"
+        :aria-label="$t('openMenu')"
       >
         ☰
       </button>
