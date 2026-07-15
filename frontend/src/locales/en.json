@@ -1,0 +1,69 @@
+{
+  "home": "Home",
+  "tourist": "Tourist Spots",
+  "restaurant": "Restaurants",
+  "accommodation": "Accommodation",
+  "festival": "Festival Calendar",
+  "community": "Community",
+  "openMenu": "Open Menu",
+  "weather": {
+    "title": "Today's Weather",
+    "subtitle": "Travel suitability in Daejeon & Chungcheong",
+    "loading": "Loading...",
+    "failed": "Failed to load"
+  },
+    "chatbot": {
+    "title": "Daejeon Travel Assistant",
+    "description": "Ask about tourist spots, restaurants, and accommodations.",
+    "close": "Close chatbot",
+    "open": "Open chatbot",
+    "greeting": "Hello! Ask me anything about Daejeon.",
+    "suggestion1": "Tell me tourist spots in Yuseong-gu",
+    "suggestion2": "Find restaurants near Daejeon Station",
+    "suggestion3": "Tell me accommodations in Seo-gu",
+    "placeholder": "Enter your message",
+    "send": "Send",
+    "ask": "Ask\nChatbot"
+  },
+    "hero": {
+    "title": "Taste & Travel in Daejeon",
+    "description": "Find tourist spots, restaurants, and accommodations easily.",
+    "placeholder": "Search places. Example: Hanbat Arboretum, Yuseong Hot Spring",
+    "kkumdori": "Kkumdori",
+    "kkumsuni": "Kkumsuni"
+  },
+  "places": {
+    "category": "Tourist Spot",
+    "seogu": "Seo-gu",
+    "yuseonggu": "Yuseong-gu",
+    "donggu": "Dong-gu",
+    "daedeokgu": "Daedeok-gu",
+
+    "hanbat": {
+      "name": "Hanbat Arboretum",
+      "description": "A healing urban space where you can enjoy beautiful nature throughout the year"
+    },
+
+    "expo": {
+      "name": "Expo Citizen Plaza",
+      "description": "A representative Daejeon attraction with Hanbit Tower and Expo Bridge"
+    },
+
+    "uam": {
+      "name": "Uam Historic Park",
+      "description": "A traditional cultural space with historic buildings and beautiful nature"
+    },
+    "daechung": {
+      "name": "Daecheongho Obangil Trail",
+      "description": "A representative ecological walking trail following the beautiful scenery of Daecheong Lake"
+    },
+
+    "yuseong": {
+      "name": "Yuseong Hot Spring",
+      "description": "Enjoy a relaxing break at Daejeon's famous hot spring attraction"
+    }
+  },
+    "common": {
+    "detail": "View Details"
+  }
+}
