@@ -15,6 +15,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": "http://localhost:8000",
+
+      // WebSocket은 ws: true 를 켜줘야 프록시가 연결을 넘겨준다.
+      "/ws": {
+        target: "ws://localhost:8000",
+        ws: true,
+      },
     },
   },
 });
