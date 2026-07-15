@@ -6,46 +6,37 @@
         <span>DAEJEON LOCAL COMMUNITY</span>
       </div>
 
-      <span class="app-footer__divider" />
+      <span class="app-footer__divider"></span>
 
-      <p>
-        본 서비스는 대전광역시 공공데이터를 활용하여 제작되었습니다.
-      </p>
+      <p>본 서비스는 대전광역시 공공데이터를 활용하여 제작되었습니다.</p>
 
-      <span class="app-footer__divider" />
+      <span class="app-footer__divider"></span>
 
-      <p>
-        © 2026 Daejeon Story. All rights reserved.
-      </p>
-
-      <span
-        class="app-footer__bread"
-        aria-hidden="true"
-      >
-        🥐
-      </span>
+      <p>© 2026 Daejeon Story. All rights reserved.</p>
     </div>
   </footer>
 </template>
 
 <style scoped>
 .app-footer {
-  padding: 18px 20px;
-
-  background: rgba(255, 250, 239, 0.92);
-  border-top: 1px solid #ead6b6;
+  position: static;
+  width: 100%;
+  margin-top: 32px;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  background: #fffaf0;
+  border-top: 1px solid #e8c98c;
 }
 
 .app-footer__inner {
-  width: min(980px, 100%);
+  width: min(1100px, 100%);
   margin: 0 auto;
-
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 18px;
-
-  color: #8b6e56;
+  flex-wrap: wrap;
+  color: #806040;
   font-size: 12px;
 }
 
@@ -56,8 +47,8 @@
 }
 
 .app-footer__brand strong {
-  color: var(--color-brown-800);
   font-size: 15px;
+  color: #5b3518;
 }
 
 .app-footer__brand span {
@@ -66,20 +57,18 @@
 
 .app-footer__divider {
   width: 1px;
-  height: 15px;
-
-  background: #d8bd97;
+  height: 16px;
+  background: #d7af6f;
 }
 
-.app-footer__bread {
-  font-size: 20px;
+.app-footer p {
+  margin: 0;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   .app-footer__inner {
     flex-direction: column;
     gap: 8px;
-
     text-align: center;
   }
 

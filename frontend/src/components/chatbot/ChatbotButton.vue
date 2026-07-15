@@ -118,6 +118,7 @@ const handleSuggestion = async (question) => {
       type="button"
       class="chatbot-widget__button"
       :aria-expanded="chatbotOpen"
+      aria-label="챗봇 열기"
       @click="toggleChatbot"
     >
       <img :src="kkumsuniImage" alt="" />
@@ -219,6 +220,7 @@ const handleSuggestion = async (question) => {
 
 .chatbot-widget__header {
   padding: 16px 18px;
+  padding: 16px 18px;
 
   display: flex;
 
@@ -282,6 +284,7 @@ const handleSuggestion = async (question) => {
 
 .chatbot-widget__suggestions {
   margin-top: 18px;
+  margin-top: 18px;
 
   display: flex;
 
@@ -291,6 +294,7 @@ const handleSuggestion = async (question) => {
 }
 
 .chatbot-widget__suggestions button {
+  padding: 10px 12px;
   padding: 10px 12px;
 
   background: #fff1cf;
@@ -311,6 +315,7 @@ const handleSuggestion = async (question) => {
 ========================= */
 
 .chatbot-widget__input {
+  padding: 12px;
   padding: 12px;
 
   display: flex;
@@ -335,6 +340,7 @@ const handleSuggestion = async (question) => {
 }
 
 .chatbot-widget__input button {
+  padding: 0 15px;
   padding: 0 15px;
 
   background: var(--color-gold-500);
@@ -374,6 +380,7 @@ const handleSuggestion = async (question) => {
   }
 
   .chatbot-widget__button span {
+    display: none;
     display: none;
   }
 
