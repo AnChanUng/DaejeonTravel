@@ -1,4 +1,5 @@
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -207,26 +208,34 @@ def normalize_location(
     }
 
 
+# 장소 데이터는 사용자가 추가·수정하지 않는 정적 데이터이므로
+# 요청마다 파일을 다시 읽지 않고 첫 요청 때 한 번만 읽어 메모리에 캐싱한다.
+# (서버를 재시작하면 다시 읽는다)
+#
+# 캐시가 실수로 변경되는 것을 막기 위해 tuple로 반환한다.
+# 정렬 등 목록을 변경해야 하는 곳에서는 list(...)로 감싸서 사용할 것.
+@lru_cache(maxsize=None)
 def load_locations_by_type(
     location_type: str,
-) -> list[dict]:
+) -> tuple[dict, ...]:
     file_path = LOCATION_FILES.get(location_type)
 
     if not file_path:
-        return []
+        return ()
 
     raw_items = read_json_file(file_path)
 
-    return [
+    return tuple(
         normalize_location(
             item,
             location_type,
         )
         for item in raw_items
-    ]
+    )
 
 
-def load_all_searchable_locations() -> list[dict]:
+@lru_cache(maxsize=None)
+def load_all_searchable_locations() -> tuple[dict, ...]:
     locations: list[dict] = []
 
     for location_type in LOCATION_FILES:
@@ -234,7 +243,7 @@ def load_all_searchable_locations() -> list[dict]:
             load_locations_by_type(location_type)
         )
 
-    return locations
+    return tuple(locations)
 
 
 # 목록 조회
@@ -252,7 +261,8 @@ def list_locations(
             detail="지원하지 않는 장소 유형입니다.",
         )
 
-    locations = load_locations_by_type(type)
+    # 캐시를 직접 정렬하지 않도록 목록을 복사해서 사용
+    locations = list(load_locations_by_type(type))
 
     if region and region in REGION_PREFIX:
         prefix = REGION_PREFIX[region]
@@ -290,6 +300,56 @@ def list_locations(
         "page": page,
         "size": size,
         "items": locations[start:end],
+    }
+
+
+# 지도용 좌표 조회 (페이지네이션 없이 전체)
+# suggestions, exact와 마찬가지로 "/{content_id}"보다 위에 있어야 합니다.
+@router.get("/map")
+def map_locations(
+    type: str,
+    region: str | None = None,
+):
+    if type not in LOCATION_FILES:
+        raise HTTPException(
+            status_code=400,
+            detail="지원하지 않는 장소 유형입니다.",
+        )
+
+    locations = load_locations_by_type(type)
+
+    if region and region in REGION_PREFIX:
+        prefix = REGION_PREFIX[region]
+
+        locations = [
+            location
+            for location in locations
+            if location["addr"].startswith(prefix)
+        ]
+
+    # 지도에 찍으려면 좌표가 숫자여야 하므로
+    # 좌표가 없거나 숫자로 바꿀 수 없는 장소는 제외합니다.
+    items = []
+
+    for location in locations:
+        try:
+            lat = float(location["lat"])
+            lng = float(location["lng"])
+
+        except (TypeError, ValueError):
+            continue
+
+        items.append(
+            {
+                **location,
+                "lat": lat,
+                "lng": lng,
+            }
+        )
+
+    return {
+        "total": len(items),
+        "items": items,
     }
 
 

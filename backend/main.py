@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from config import settings
 from database import engine, Base
-from models import Post, Location
-from routers import posts, weather, locations, festivals, chat
+from models import Post
+from routers import posts, weather, locations, festivals, stats
 
-Base.metadata.create_all(bind=engine)   # 테이블 없으면 생성
+Base.metadata.create_all(bind=engine)   # posts 테이블 없으면 생성
 
 os.makedirs("uploads", exist_ok=True)
 
@@ -25,9 +25,9 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(posts.router)
 app.include_router(weather.router)
-app.include_router(chat.router)
 app.include_router(locations.router)
 app.include_router(festivals.router)
+app.include_router(stats.router)
 
 @app.get("/")
 def root():
