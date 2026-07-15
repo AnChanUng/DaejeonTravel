@@ -36,7 +36,7 @@ const handleSend = async () => {
 
     messages.value.push({
       role: "bot",
-      content: res.answer,
+      content: res.data.answer,
     });
   } catch (e) {
     messages.value.push({
