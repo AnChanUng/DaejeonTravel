@@ -7,8 +7,6 @@ const { t } = useI18n()
 
 import { sendMessage } from "@/api/chatbot";
 
-import kkumsuniImage from "../../assets/images/mascots/kkumsuni.png";
-
 const chatbotOpen = ref(false);
 const messages = ref([
   {
