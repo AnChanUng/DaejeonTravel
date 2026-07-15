@@ -1,10 +1,8 @@
 import json
 import re
 
+from google import genai
 from pathlib import Path
-
-from openai import OpenAI
-
 from config import settings
 from chatbot.prompt import SYSTEM_PROMPT
 
@@ -38,8 +36,10 @@ def extract_keywords(question: str) -> list[str]:
     # 키워드가 하나도 안 걸리면 원본 단어라도 반환 (검색 결과 0건 방지)
     return keywords if keywords else words
 
-
-client = OpenAI(api_key=settings.openai_api_key)
+# ai
+client = genai.Client(
+    api_key=settings.gemini_api_key
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -113,7 +113,7 @@ def search_data(dataset: str, question: str, limit=5):
 
 def build_context(results):
     """
-    검색된 데이터를 GPT에게 전달할 문자열로 변환
+    검색된 데이터를 Gemini에게 전달할 문자열로 변환
     """
 
     if not results:
@@ -133,34 +133,64 @@ def build_context(results):
 
     return "\n\n".join(contexts)
 
+def build_prompt(question: str, context: str) -> str:
+    return f"""
+            {SYSTEM_PROMPT}
+
+            ==========================
+            사용자 질문
+            ==========================
+
+            {question}
+
+            ==========================
+            참고 데이터
+            ==========================
+
+            {context}
+
+            ==========================
+            답변 작성 규칙
+            ==========================
+
+            - 반드시 참고 데이터 안에서만 답변한다.
+            - 없는 정보는 추측하지 않는다.
+            - 필요한 경우 목록 형태로 정리한다.
+            - 자연스럽고 친절한 한국어로 답변한다.
+            """
+
 def ask_chatbot(question: str):
+    """
+    사용자 질문을 받아
+    1. 데이터셋 선택
+    2. JSON 검색
+    3. Context 생성
+    4. Gemini에게 전달
+    """
+
     dataset = select_dataset(question)
 
     results = search_data(dataset, question)
 
     if not results:
-        return "제공된 데이터에서 찾을 수 없습니다."
+        return "제공된 데이터에서 관련 정보를 찾을 수 없습니다."
 
     context = build_context(results)
 
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=[
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT,
-            },
-            {
-                "role": "user",
-                "content": f"""
-                        질문:
-                        {question}
+    prompt = build_prompt(question, context)
 
-                        참고 데이터:
-                        {context}
-                        """,
-            },
-        ],
-    )
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
 
-    return response.output_text
+        if hasattr(response, "text") and response.text:
+            return response.text
+
+        return str(response)
+
+    except Exception as e:
+        print("Gemini Error:", e)
+        return "AI 응답 생성 중 오류가 발생했습니다."
+    
