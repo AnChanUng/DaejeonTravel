@@ -97,14 +97,14 @@ const selectLanguage = (languageCode) => {
           to="/map"
           active-class="app-header__link--active"
         >
-          여행 지도
+          {{ $t('map') }}
         </RouterLink>
 
         <RouterLink
           to="/dashboard"
           active-class="app-header__link--active"
         >
-          대시보드
+          {{ $t('dashboard') }}
         </RouterLink>
       </nav>
 

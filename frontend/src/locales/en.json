@@ -3,9 +3,11 @@
   "tourist": "Tourist Spots",
   "restaurant": "Restaurants",
   "accommodation": "Accommodation",
-  "festival": "Festival Calendar",
+  "festival": "Festival",
   "community": "Community",
   "openMenu": "Open Menu",
+  "map": "Map",
+  "dashboard": "Dashboard",
   "weather": {
     "title": "Today's Weather",
     "subtitle": "Travel suitability in Daejeon & Chungcheong",
