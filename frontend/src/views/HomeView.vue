@@ -6,7 +6,7 @@ import AppFooter from '../components/layout/AppFooter.vue'
 
 import HeroSection from '../components/home/HeroSection.vue'
 import TouristCarousel from '../components/home/TouristCarousel.vue'
-import WeatherCard from '../components/home/WeatherCard.vue'
+import WeatherWidget from "../components/weather/WeatherWidget.vue";
 
 import ChatbotButton from '../components/chatbot/ChatbotButton.vue'
 
@@ -103,151 +103,75 @@ const recentPosts = ref([
       <!-- 메인 히어로 영역 -->
       <HeroSection />
 
-
       <!-- 관광지 카드 캐러셀 -->
       <TouristCarousel
         :spots="touristSpots"
       />
 
-
       <!-- 날씨 카드 -->
-      <WeatherCard />
-
-      <!-- 대전 라인 장식 -->
-      <div class="daejeon-line-wrapper">
-
-        <img
-          :src="daejeonLineImage"
-          alt="대전 랜드마크"
-          class="daejeon-line"
-        />
-
-      </div>
-
-
+      <section class="home-weather">
+        <WeatherWidget />
+      </section>
     </main>
-
-
     <AppFooter />
-
-
     <ChatbotButton />
-
   </div>
 </template>
 
 
 <style scoped>
-
 .home-view {
-
-  width:100%;
-
-  height:100vh;
-
-  display:flex;
-
-  flex-direction:column;
-
-  overflow:hidden;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .home-main {
-
-   flex:1;
-
-  display:flex;
-
-  flex-direction:column;
-
-  justify-content:flex-start;
-
-  align-items:center;
-
-  overflow:hidden;
-
+  width: 100%;
+  flex: 1;
 }
 
-.home-main :deep(.hero-section) {
-
-  flex-shrink:0;
-
+.home-weather {
+  width: 100%;
+  padding-bottom: 16px;
 }
-
-
 
 .home-view::before {
-
   position: absolute;
-
   right: -100px;
-
   bottom: 80px;
-
-
   width: 430px;
-
   height: 260px;
-
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(233,174,86,0.12),
-      transparent 65%
-    );
-
-
-  content: '';
-
+  background: radial-gradient(
+    circle,
+    rgba(233, 174, 86, 0.12),
+    transparent 65%
+  );
+  content: "";
   pointer-events: none;
-
 }
-
-
-
-/* 대전 랜드마크 라인 */
 
 .daejeon-line-wrapper {
-
   width: 100%;
-
   margin-top: -10px;
-
   overflow: hidden;
-
 }
-
-
 
 .daejeon-line {
-
   width: 100%;
-
   height: 130px;
-
-
   object-fit: cover;
-
   object-position: center bottom;
-
-
   opacity: 0.35;
-
   pointer-events: none;
-
 }
 
-
-
-@media(max-width:768px){
-
+@media (max-width: 768px) {
   .daejeon-line {
-
-    height:80px;
-
+    height: 80px;
   }
-
 }
-
 </style>

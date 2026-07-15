@@ -58,7 +58,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../api";
 import BaseButton from "../components/BaseButton.vue";
-import WeatherWidget from "../components/WeatherWidget.vue";
+import WeatherWidget from "../components/weather/WeatherWidget.vue";
 
 const router = useRouter();
 const posts = ref([]);
