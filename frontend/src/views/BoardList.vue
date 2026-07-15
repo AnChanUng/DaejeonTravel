@@ -77,9 +77,6 @@ onMounted(fetchPosts)
 
 <template>
   <PageLayout>
-
-    <WeatherWidget class="weather" />
-
     <div class="board-head">
       <span class="board-head__bread">🥐</span>
       <h1>커뮤니티</h1>

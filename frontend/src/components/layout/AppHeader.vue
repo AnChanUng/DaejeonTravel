@@ -1,8 +1,16 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+
+const { locale } = useI18n()
 
 const languageMenuOpen = ref(false)
-const currentLanguage = ref('KO')
+
+const currentLanguage = ref(
+  locale.value.toUpperCase()
+)
+
 
 const languages = [
   {
@@ -15,14 +23,28 @@ const languages = [
   }
 ]
 
+
 const toggleLanguageMenu = () => {
   languageMenuOpen.value = !languageMenuOpen.value
 }
 
+
 const selectLanguage = (languageCode) => {
+
   currentLanguage.value = languageCode
+
+  // 실제 언어 변경
+  locale.value = languageCode.toLowerCase()
+
+  // 새로고침 후 유지
+  localStorage.setItem(
+    'language',
+    languageCode.toLowerCase()
+  )
+
   languageMenuOpen.value = false
 }
+
 </script>
 
 <template>
@@ -33,42 +55,56 @@ const selectLanguage = (languageCode) => {
           to="/"
           exact-active-class="app-header__link--active"
         >
-          홈
+          {{ $t('home') }}
         </RouterLink>
 
         <RouterLink
           to="/tourist-spots"
           active-class="app-header__link--active"
         >
-          관광지
+          {{ $t('tourist') }}
         </RouterLink>
 
         <RouterLink
           to="/restaurants"
           active-class="app-header__link--active"
         >
-          음식점
+          {{ $t('restaurant') }}
         </RouterLink>
 
         <RouterLink
           to="/accommodations"
           active-class="app-header__link--active"
         >
-          숙박
+          {{ $t('accommodation') }}
         </RouterLink>
 
         <RouterLink
           to="/festivals"
           active-class="app-header__link--active"
         >
-          축제 캘린더
+          {{ $t('festival') }}
         </RouterLink>
 
         <RouterLink
           to="/community"
           active-class="app-header__link--active"
         >
-          커뮤니티
+          {{ $t('community') }}
+        </RouterLink>
+
+        <RouterLink
+          to="/map"
+          active-class="app-header__link--active"
+        >
+          여행 지도
+        </RouterLink>
+
+        <RouterLink
+          to="/dashboard"
+          active-class="app-header__link--active"
+        >
+          대시보드
         </RouterLink>
       </nav>
 
@@ -126,7 +162,7 @@ const selectLanguage = (languageCode) => {
       <button
         type="button"
         class="app-header__mobile-menu"
-        aria-label="메뉴 열기"
+        :aria-label="$t('openMenu')"
       >
         ☰
       </button>
@@ -158,11 +194,12 @@ const selectLanguage = (languageCode) => {
   backdrop-filter: blur(10px);
 }
 
+/* 메뉴가 8개로 늘어나 언어 버튼과 겹치지 않도록 간격을 조금 줄임 */
 .app-header__navigation {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(24px, 3vw, 52px);
+  gap: clamp(20px, 2.4vw, 42px);
 }
 
 .app-header__navigation a {
@@ -275,9 +312,9 @@ const selectLanguage = (languageCode) => {
   cursor: pointer;
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1250px) {
   .app-header__navigation {
-    gap: 22px;
+    gap: 20px;
   }
 
   .app-header__navigation a {

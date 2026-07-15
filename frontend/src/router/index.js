@@ -11,6 +11,8 @@ import BoardBookmarks from "../views/BoardBookmarks.vue";
 import LocationListView from "../views/LocationListView.vue";
 import LocationDetailView from "../views/LocationDetailView.vue";
 import FestivalCalendarView from "../views/FestivalCalendarView.vue";
+import MapView from "../views/MapView.vue";
+import DashboardView from "../views/DashboardView.vue";
 
 const TemporaryView = {
   template: `
@@ -26,7 +28,7 @@ const TemporaryView = {
         현재는 메인 페이지를 먼저 구현하고 있습니다.
       </p>
 
-      <a
+      
         href="/"
         style="
           display:inline-block;
@@ -102,6 +104,20 @@ const routes = [
     component: FestivalCalendarView,
   },
 
+  // 여행 지도 (핀 표시 + 경로 안내)
+  {
+    path: "/map",
+    name: "map",
+    component: MapView,
+  },
+
+  // 통계 대시보드
+  {
+    path: "/dashboard",
+    name: "dashboard",
+    component: DashboardView,
+  },
+
   // 검색
   {
     path: "/search",
@@ -139,15 +155,6 @@ const routes = [
     path: "/community/:id/edit",
     name: "board-edit",
     component: BoardEdit,
-  },
-
-  // 구 /board 주소 호환용 리다이렉트
-  { path: "/board", redirect: "/community" },
-  { path: "/board/write", redirect: "/community/write" },
-  { path: "/board/:id", redirect: (to) => `/community/${to.params.id}` },
-  {
-    path: "/board/:id/edit",
-    redirect: (to) => `/community/${to.params.id}/edit`,
   },
 ];
 

@@ -1,50 +1,132 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '../../api'
+
+const { locale } = useI18n()
 
 const items = ref([])
 const loading = ref(true)
 
-onMounted(async () => {
+
+const fetchWeather = async () => {
   try {
-    const res = await api.get('/api/weather')
+    loading.value = true
+
+    const res = await api.get(
+      `/api/weather?lang=${locale.value}`
+    )
+
     items.value = res.data.items
-  } catch {
+
+  } catch (error) {
+    console.error('날씨 조회 실패:', error)
     items.value = []
+
   } finally {
     loading.value = false
   }
+}
+
+
+onMounted(() => {
+  fetchWeather()
 })
 
+
+watch(
+  locale,
+  () => {
+    fetchWeather()
+  }
+)
+
+
 function gradeClass(grade) {
-  return { 좋음: 'good', 보통: 'soso', 나쁨: 'bad' }[grade] || ''
+  return {
+    좋음: 'good',
+    보통: 'soso',
+    나쁨: 'bad',
+    Good: 'good',
+    Normal: 'soso',
+    Bad: 'bad'
+  }[grade] || ''
 }
+
 </script>
 
 <template>
   <div class="weather-card">
-    <h2>☀️ 오늘의 날씨</h2>
-    <p class="sub">대전·충청 지역 여행 적합도</p>
 
-    <div v-if="loading" class="loading">불러오는 중...</div>
+    <h2>
+      ☀️ {{ $t('weather.title') }}
+    </h2>
+
+    <p class="sub">
+      {{ $t('weather.subtitle') }}
+    </p>
+
+
+    <div v-if="loading" class="loading">
+      {{ $t('weather.loading') }}
+    </div>
+
 
     <div v-else class="region-grid">
-      <div v-for="w in items" :key="w.region" class="region-item">
+
+      <div
+        v-for="w in items"
+        :key="w.region"
+        class="region-item"
+      >
+
         <template v-if="!w.error">
-          <span class="region-name">{{ w.region }}</span>
-          <span class="temp">{{ Math.round(w.temp) }}°</span>
-          <span class="desc">{{ w.desc }}</span>
-          <div class="travel" :class="gradeClass(w.travel.grade)">
-            {{ w.travel.emoji }} {{ w.travel.grade }}
+
+          <span class="region-name">
+            {{ w.region }}
+          </span>
+
+          <span class="temp">
+            {{ Math.round(w.temp) }}°
+          </span>
+
+          <span class="desc">
+            {{ w.desc }}
+          </span>
+
+
+          <div
+            class="travel"
+            :class="gradeClass(w.travel.grade)"
+          >
+            {{ w.travel.emoji }}
+            {{ w.travel.grade }}
           </div>
-          <p class="comment">{{ w.travel.comment }}</p>
+
+
+          <p class="comment">
+            {{ w.travel.comment }}
+          </p>
+
         </template>
+
+
         <template v-else>
-          <span class="region-name">{{ w.region }}</span>
-          <span class="desc">조회 실패</span>
+
+          <span class="region-name">
+            {{ w.region }}
+          </span>
+
+          <span class="desc">
+            {{ $t('weather.failed') }}
+          </span>
+
         </template>
+
       </div>
+
     </div>
+
   </div>
 </template>
 
