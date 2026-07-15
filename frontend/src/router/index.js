@@ -12,39 +12,6 @@ import LocationListView from "../views/LocationListView.vue";
 import LocationDetailView from "../views/LocationDetailView.vue";
 import FestivalCalendarView from "../views/FestivalCalendarView.vue";
 
-const TemporaryView = {
-  template: `
-    <main style="
-      min-height: 100vh;
-      padding: 80px 20px;
-      text-align: center;
-      background: #fff9ed;
-    ">
-      <h1>페이지 준비 중입니다.</h1>
-
-      <p style="margin-top: 15px;">
-        현재는 메인 페이지를 먼저 구현하고 있습니다.
-      </p>
-
-      <a
-        href="/"
-        style="
-          display:inline-block;
-          margin-top:25px;
-          padding:10px 18px;
-          background:#e8a52a;
-          border-radius:999px;
-          color:#3f2819;
-          text-decoration:none;
-        "
-      >
-        메인으로 돌아가기
-      </a>
-
-    </main>
-  `,
-};
-
 const routes = [
   // 메인
   {
@@ -105,7 +72,9 @@ const routes = [
   // 검색
   {
     path: "/search",
-    component: TemporaryView,
+    name: "search",
+    component: LocationListView,
+    props: { type: "검색" },
   },
 
   // 커뮤니티
