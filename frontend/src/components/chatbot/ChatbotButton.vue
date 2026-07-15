@@ -1,649 +1,430 @@
 <script setup>
-import { ref } from 'vue'
-
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import kkumsuniImage from '../../assets/images/mascots/kkumsuni.png'
+import { useI18n } from 'vue-i18n'
 
-const chatbotOpen = ref(false)
+const { t } = useI18n()
+
+import { sendMessage } from "@/api/chatbot";
+
+const chatbotOpen = ref(false);
+const messages = ref([
+  {
+    role: "bot",
+    content: "안녕하세요! 👋\n궁금한 대전 정보를 물어보세요.",
+  },
+]);
+
+const input = ref("");
 
 const toggleChatbot = () => {
-  chatbotOpen.value = !chatbotOpen.value
-}
-</script>
+  chatbotOpen.value = !chatbotOpen.value;
+};
 
+const handleSend = async () => {
+  if (!input.value.trim()) return;
+
+  const text = input.value;
+
+  messages.value.push({
+    role: "user",
+    content: text,
+  });
+
+  input.value = "";
+
+  try {
+    const res = await sendMessage(text);
+
+    messages.value.push({
+      role: "bot",
+      content: res.data.answer,
+    });
+  } catch (e) {
+    messages.value.push({
+      role: "bot",
+      content: "오류가 발생했습니다.",
+    });
+  }
+};
+
+const handleSuggestion = async (question) => {
+  input.value = question;
+  await handleSend();
+};
+</script>
 
 <template>
   <div class="chatbot-widget">
-
     <!-- 채팅창 -->
-    <div
-      v-if="chatbotOpen"
-      class="chatbot-widget__panel"
-    >
-
+    <div v-if="chatbotOpen" class="chatbot-widget__panel">
       <header class="chatbot-widget__header">
-
         <div>
-          <strong>
-            대전 여행 도우미
-          </strong>
+          <strong>{{ t('chatbot.title') }}</strong>
 
-          <span>
-            관광지·음식점·숙박을 물어보세요.
-          </span>
+          <span>{{ t('chatbot.description') }}</span>
         </div>
-
 
         <button
           type="button"
-          aria-label="챗봇 닫기"
+          :aria-label="t('chatbot.close')"
           @click="toggleChatbot"
         >
           ×
         </button>
-
       </header>
 
-
-
       <div class="chatbot-widget__body">
-
         <div class="chatbot-widget__message">
-          안녕하세요! 궁금한 대전 정보를 물어보세요.
+          {{ t('chatbot.greeting') }}
         </div>
-
 
         <div class="chatbot-widget__suggestions">
-
-          <button>
-            유성구 관광지를 알려줘
+          <button type="button">
+            {{ t('chatbot.suggestion1') }}
           </button>
 
-
-          <button>
-            대전역 근처 음식점 찾아줘
+          <button type="button">
+            {{ t('chatbot.suggestion2') }}
           </button>
 
-
-          <button>
-            서구 숙박시설을 알려줘
+          <button type="button">
+            {{ t('chatbot.suggestion3') }}
           </button>
-
         </div>
 
+        <!-- 실제 대화 -->
+        <div
+          v-for="(msg, idx) in messages.slice(1)"
+          :key="idx"
+          :class="[
+            'chat-message',
+            msg.role === 'user' ? 'chat-message--user' : 'chat-message--bot',
+          ]"
+        >
+          {{ msg.content }}
+        </div>
       </div>
 
-
-
-      <form
-        class="chatbot-widget__input"
-        @submit.prevent
-      >
-
+      <form class="chatbot-widget__input" @submit.prevent="handleSend">
         <input
+          v-model="input"
           type="text"
-          placeholder="메시지를 입력하세요"
+          :placeholder="t('chatbot.placeholder')"
         >
 
-
-        <button>
-          전송
+        <button type="submit">
+          {{ t('chatbot.send') }}
         </button>
-
-
       </form>
-
     </div>
-
-
 
     <!-- 챗봇 버튼 -->
     <button
       type="button"
       class="chatbot-widget__button"
       :aria-expanded="chatbotOpen"
+      :aria-label="t('chatbot.open')"
       @click="toggleChatbot"
     >
+      <img :src="kkumsuniImage" alt="" />
 
-      <img
-        :src="kkumsuniImage"
-        alt=""
-      >
-
-
-      <span>
-        챗봇에게<br>
-        물어보기
-      </span>
-
-
+        <span class="chatbot-text">
+          {{ t('chatbot.ask') }}
+        </span>
     </button>
-
-
   </div>
 </template>
 
-
-
 <style scoped>
-
-
 .chatbot-widget {
+  position: fixed;
 
-  position:fixed;
+  right: 30px;
 
-  right:30px;
+  bottom: 90px;
 
-  bottom:90px;
-
-  z-index:100;
-
+  z-index: 100;
 }
 
+.chatbot-text {
+  white-space: pre-line;
+}
 
-
-
-
-/* =========================
-   버튼
-========================= */
-
+/* 버튼 */
 
 .chatbot-widget__button {
+  min-width: 160px;
 
+  min-height: 70px;
 
-  min-width:160px;
+  padding: 8px 20px 8px 12px;
 
-  min-height:70px;
+  display: flex;
 
+  align-items: center;
 
-  padding:8px 20px 8px 12px;
+  justify-content: center;
 
+  gap: 10px;
 
-  display:flex;
+  background: linear-gradient(135deg, #ffe381, #ffc43f);
 
-  align-items:center;
+  border: 1px solid #e5a725;
 
-  justify-content:center;
+  border-radius: 999px;
 
-  gap:10px;
+  box-shadow: 0 12px 25px rgba(107, 68, 22, 0.19);
 
+  color: var(--color-brown-900);
 
+  font-weight: 800;
 
-  background:linear-gradient(
-    135deg,
-    #ffe381,
-    #ffc43f
-  );
-
-
-  border:1px solid #e5a725;
-
-
-  border-radius:999px;
-
-
-  box-shadow:
-
-  0 12px 25px rgba(107,68,22,.19);
-
-
-  color:var(--color-brown-900);
-
-
-  font-weight:800;
-
-
-  cursor:pointer;
-
+  cursor: pointer;
 }
-
-
 
 .chatbot-widget__button img {
+  width: 52px;
 
+  height: 52px;
 
-  width:52px;
-
-  height:52px;
-
-
-  object-fit:contain;
-
+  object-fit: contain;
 }
-
-
 
 .chatbot-widget__button span {
-
-
-  line-height:1.3;
-
+  line-height: 1.3;
 }
-
-
-
-
 
 /* =========================
    채팅창
 ========================= */
 
-
 .chatbot-widget__panel {
+  position: absolute;
 
+  right: 0;
 
-  position:absolute;
+  bottom: 82px;
 
+  width: 350px;
 
-  right:0;
+  height: 470px;
 
+  display: flex;
 
-  bottom:82px;
+  flex-direction: column;
 
+  overflow: hidden;
 
+  background: white;
 
-  width:350px;
+  border: 1px solid var(--color-border);
 
+  border-radius: 20px;
 
-  height:470px;
-
-
-
-  display:flex;
-
-
-  flex-direction:column;
-
-
-
-  overflow:hidden;
-
-
-
-  background:white;
-
-
-
-  border:1px solid var(--color-border);
-
-
-  border-radius:20px;
-
-
-
-  box-shadow:
-
-  0 18px 45px rgba(67,39,16,.23);
-
-
+  box-shadow: 0 18px 45px rgba(67, 39, 16, 0.23);
 }
-
-
-
-
 
 .chatbot-widget__header {
+  padding: 16px 18px;
+  padding: 16px 18px;
 
+  display: flex;
 
-  padding:16px 18px;
+  align-items: center;
 
+  justify-content: space-between;
 
-
-  display:flex;
-
-
-  align-items:center;
-
-
-  justify-content:space-between;
-
-
-
-  background:#f4ad35;
-
-
+  background: #f4ad35;
 }
-
-
 
 .chatbot-widget__header strong,
 .chatbot-widget__header span {
-
-
-  display:block;
-
-
+  display: block;
 }
-
-
 
 .chatbot-widget__header span {
+  margin-top: 3px;
 
-
-  margin-top:3px;
-
-
-  font-size:12px;
-
-
+  font-size: 12px;
 }
-
-
 
 .chatbot-widget__header button {
+  background: transparent;
 
+  border: 0;
 
-  background:transparent;
+  font-size: 27px;
 
-
-  border:0;
-
-
-  font-size:27px;
-
-
-  cursor:pointer;
-
+  cursor: pointer;
 }
-
-
-
-
 
 /* =========================
    내용
 ========================= */
 
-
 .chatbot-widget__body {
+  flex: 1;
 
+  padding: 18px;
 
-  flex:1;
+  overflow-y: auto;
 
-
-  padding:18px;
-
-
-
-  overflow-y:auto;
-
-
-
-  background:#fffaf1;
-
-
+  background: #fffaf1;
 }
-
-
 
 .chatbot-widget__message {
+  max-width: 85%;
 
+  padding: 12px 14px;
 
-  max-width:85%;
+  background: white;
 
+  border-radius: 4px 15px 15px;
 
+  box-shadow: var(--shadow-small);
 
-  padding:12px 14px;
+  font-size: 14px;
 
-
-
-  background:white;
-
-
-
-  border-radius:
-
-  4px 15px 15px;
-
-
-
-  box-shadow:
-
-  var(--shadow-small);
-
-
-
-  font-size:14px;
-
-
-
-  line-height:1.6;
-
-
+  line-height: 1.6;
 }
-
-
-
 
 .chatbot-widget__suggestions {
+  margin-top: 18px;
+  margin-top: 18px;
 
+  display: flex;
 
-  margin-top:18px;
+  flex-direction: column;
 
-
-
-  display:flex;
-
-
-  flex-direction:column;
-
-
-
-  gap:8px;
-
-
+  gap: 8px;
 }
-
-
 
 .chatbot-widget__suggestions button {
+  padding: 10px 12px;
+  padding: 10px 12px;
 
+  background: #fff1cf;
 
-  padding:10px 12px;
+  border: 1px solid #e5c085;
 
+  border-radius: 10px;
 
+  text-align: left;
 
-  background:#fff1cf;
+  font-size: 13px;
 
-
-
-  border:1px solid #e5c085;
-
-
-
-  border-radius:10px;
-
-
-
-  text-align:left;
-
-
-
-  font-size:13px;
-
-
-
-  cursor:pointer;
-
-
+  cursor: pointer;
 }
-
-
-
-
 
 /* =========================
    입력창
 ========================= */
 
-
 .chatbot-widget__input {
+  padding: 12px;
+  padding: 12px;
 
+  display: flex;
 
-  padding:12px;
+  gap: 8px;
 
-
-
-  display:flex;
-
-
-
-  gap:8px;
-
-
-
-  border-top:1px solid var(--color-border);
-
-
+  border-top: 1px solid var(--color-border);
 }
-
-
 
 .chatbot-widget__input input {
+  flex: 1;
 
+  min-width: 0;
 
-  flex:1;
+  padding: 10px;
 
+  border: 1px solid var(--color-border);
 
-  min-width:0;
+  border-radius: 9px;
 
-
-
-  padding:10px;
-
-
-
-  border:1px solid var(--color-border);
-
-
-
-  border-radius:9px;
-
-
-
-  outline:0;
-
-
+  outline: 0;
 }
-
-
 
 .chatbot-widget__input button {
+  padding: 0 15px;
+  padding: 0 15px;
 
+  background: var(--color-gold-500);
 
-  padding:0 15px;
+  border: 0;
 
+  border-radius: 9px;
 
+  font-weight: 700;
 
-  background:var(--color-gold-500);
-
-
-
-  border:0;
-
-
-
-  border-radius:9px;
-
-
-
-  font-weight:700;
-
-
-
-  cursor:pointer;
-
-
+  cursor: pointer;
 }
-
-
-
-
 
 /* =========================
    모바일
 ========================= */
 
-
-@media(max-width:600px){
-
-
+@media (max-width: 600px) {
   .chatbot-widget {
+    right: 15px;
 
-
-    right:15px;
-
-
-    bottom:75px;
-
-
+    bottom: 75px;
   }
-
-
 
   .chatbot-widget__button {
+    min-width: 64px;
 
+    min-height: 64px;
 
-    min-width:64px;
-
-
-    min-height:64px;
-
-
-    padding:5px;
-
-
+    padding: 5px;
   }
-
-
 
   .chatbot-widget__button img {
+    width: 52px;
 
-
-    width:52px;
-
-
-    height:52px;
-
-
+    height: 52px;
   }
-
-
 
   .chatbot-widget__button span {
-
-
-    display:none;
-
-
+    display: none;
+    display: none;
   }
-
-
 
   .chatbot-widget__panel {
+    position: fixed;
 
+    inset: 0;
 
-    position:fixed;
+    width: auto;
 
+    height: auto;
 
-    inset:0;
-
-
-
-    width:auto;
-
-
-    height:auto;
-
-
-
-    border-radius:0;
-
-
+    border-radius: 0;
   }
-
-
 }
 
+.chat-message {
+  max-width: 80%;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border-radius: 18px;
+  white-space: pre-line;
+  word-break: break-word;
+}
 
+.chat-message--bot {
+  margin-right: auto;
+  background: white;
+  color: #333;
+  border-radius: 4px 18px 18px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chat-message--user {
+  margin-left: auto;
+  background: #f4ad35;
+  color: white;
+  border-radius: 18px 4px 18px 18px;
+}
 </style>

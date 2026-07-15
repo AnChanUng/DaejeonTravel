@@ -1,5 +1,12 @@
+<script setup>
+import RealtimeNotice from './components/layout/RealtimeNotice.vue'
+</script>
+
 <template>
   <RouterView />
+
+  <!-- 실시간 알림 (접속자 수 + 새 게시글 토스트) -->
+  <RealtimeNotice />
 </template>
 
 <style scoped>
