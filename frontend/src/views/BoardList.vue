@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'
 import BaseButton from '../components/BaseButton.vue'
+import WeatherWidget from '../components/weather/WeatherWidget.vue'
 import PageLayout from '../components/layout/PageLayout.vue'
 
 const router = useRouter()
@@ -63,6 +64,10 @@ function goWrite() {
   router.push('/community/write')
 }
 
+function goBookmarks() {
+  router.push('/community/bookmarks')
+}
+
 function formatDate(dt) {
   return dt ? dt.slice(0, 10).replaceAll('-', '.') : ''
 }
@@ -72,6 +77,8 @@ onMounted(fetchPosts)
 
 <template>
   <PageLayout>
+
+    <WeatherWidget class="weather" />
 
     <div class="board-head">
       <span class="board-head__bread">🥐</span>
@@ -98,9 +105,10 @@ onMounted(fetchPosts)
         <input
           v-model="keyword"
           @keyup.enter="search"
-          placeholder="제목으로 검색해보세요"
+          placeholder="제목, 내용, 태그로 검색해보세요"
         />
       </div>
+      <button class="bookmark-link" @click="goBookmarks">🔖 북마크함</button>
       <BaseButton @click="goWrite">✏️ 글쓰기</BaseButton>
     </div>
 
@@ -114,12 +122,31 @@ onMounted(fetchPosts)
         class="post-card"
         @click="goDetail(post.id)"
       >
+        <img
+          v-if="post.image"
+          :src="post.image"
+          class="post-card__thumb"
+          alt=""
+        />
+        <div v-else class="post-card__thumb post-card__thumb--empty">📝</div>
+
         <div class="post-card__info">
           <span class="badge">{{ post.category }}</span>
           <p class="post-card__title">{{ post.title }}</p>
-          <span class="post-card__date">{{ formatDate(post.created_at) }}</span>
+
+          <div v-if="post.tags?.length" class="tag-row">
+            <span v-for="t in post.tags" :key="t" class="tag-chip">#{{ t }}</span>
+          </div>
+
+          <div class="post-card__meta">
+            <span class="post-card__date">{{ formatDate(post.created_at) }}</span>
+            <span class="meta-stat">👁 {{ post.view_count }}</span>
+            <span class="meta-stat">❤️ {{ post.like_count }}</span>
+            <span class="meta-stat">🔖 {{ post.bookmark_count }}</span>
+          </div>
         </div>
-        <span class="post-card__arrow">›</span>
+
+        <span class="arrow">›</span>
       </div>
 
       <div v-if="posts.length === 0" class="state-box">
@@ -146,8 +173,10 @@ onMounted(fetchPosts)
 </template>
 
 <style scoped>
+.weather {
+  margin-bottom: 36px;
+}
 
-/* 페이지 헤드 — 메인 히어로와 같은 톤 */
 .board-head {
   text-align: center;
   margin-bottom: 28px;
@@ -171,7 +200,6 @@ onMounted(fetchPosts)
   color: var(--color-brown-500);
 }
 
-/* 카테고리 탭 */
 .category-tabs {
   display: flex;
   justify-content: center;
@@ -202,7 +230,6 @@ onMounted(fetchPosts)
   color: var(--color-brown-900);
 }
 
-/* 검색 — 메인 검색창과 같은 알약형 */
 .top-bar {
   display: flex;
   gap: 10px;
@@ -239,7 +266,22 @@ onMounted(fetchPosts)
   color: #b99b74;
 }
 
-/* 게시글 카드 */
+.bookmark-link {
+  padding: 0 18px;
+  background: var(--color-cream-300);
+  border: 1.5px solid #e5c085;
+  border-radius: 999px;
+  color: var(--color-brown-800);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bookmark-link:hover {
+  background: var(--color-gold-300);
+}
+
 .card-list {
   display: flex;
   flex-direction: column;
@@ -249,8 +291,8 @@ onMounted(fetchPosts)
 .post-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
+  gap: 16px;
+  padding: 16px 20px;
   background: var(--color-cream-100);
   border: 1px solid #eed9b4;
   border-radius: 18px;
@@ -262,6 +304,28 @@ onMounted(fetchPosts)
 .post-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
+}
+
+.post-card__thumb {
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--color-cream-300);
+}
+
+.post-card__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  opacity: 0.5;
+}
+
+.post-card__info {
+  flex: 1;
+  min-width: 0;
 }
 
 .badge {
@@ -276,25 +340,48 @@ onMounted(fetchPosts)
 }
 
 .post-card__title {
-  margin-top: 8px;
+  margin-top: 7px;
   font-size: 16px;
   font-weight: 700;
   color: var(--color-brown-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.post-card__date {
-  display: block;
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
   margin-top: 6px;
+}
+
+.tag-chip {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-brown-500);
+}
+
+.post-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
   font-size: 12px;
   color: var(--color-brown-500);
 }
 
-.post-card__arrow {
+.meta-stat {
+  white-space: nowrap;
+}
+
+.post-card__arrow,
+.arrow {
+  flex-shrink: 0;
   font-size: 22px;
   color: #cba76f;
 }
 
-/* 빈 상태 / 로딩 */
 .state-box {
   padding: 60px 0;
   display: flex;
@@ -309,7 +396,6 @@ onMounted(fetchPosts)
   text-align: center;
 }
 
-/* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -350,6 +436,11 @@ onMounted(fetchPosts)
 
   .top-bar {
     flex-direction: column;
+  }
+
+  .post-card__thumb {
+    width: 56px;
+    height: 56px;
   }
 }
 </style>
