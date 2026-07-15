@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
 from models import Post
+from routers.ws import manager   # 새 글 실시간 알림용
 
 router = APIRouter(prefix="/api/posts", tags=["posts"])
 
@@ -125,6 +126,14 @@ def list_posts(
     }
 
 
+# --- 여러 게시글 요약 일괄 조회 (북마크 목록 페이지용) ---
+# 주의: "/{post_id}"보다 위에 있어야 "batch"가 post_id로 오인되지 않는다.
+@router.post("/batch")
+def get_posts_batch(ids: list[int], db: Session = Depends(get_db)):
+    rows = db.query(Post).filter(Post.id.in_(ids)).all()
+    return {"items": [to_summary(p) for p in rows]}
+
+
 # --- 상세 조회 (비밀번호는 응답에서 제외, 조회수 증가) ---
 @router.get("/{post_id}")
 def get_post(post_id: int, for_edit: bool = False, db: Session = Depends(get_db)):
@@ -142,12 +151,25 @@ def get_post(post_id: int, for_edit: bool = False, db: Session = Depends(get_db)
 
 
 # --- 작성 ---
+# 저장 후 접속 중인 모든 사용자에게 새 글 알림을 보내야 하므로 async 함수로 정의한다.
 @router.post("")
-def create_post(req: PostCreate, db: Session = Depends(get_db)):
+async def create_post(req: PostCreate, db: Session = Depends(get_db)):
     post = Post(**req.model_dump())
     db.add(post)
     db.commit()
     db.refresh(post)
+
+    await manager.broadcast(
+        {
+            "type": "new_post",
+            "post": {
+                "id": post.id,
+                "title": post.title,
+                "category": post.category,
+            },
+        }
+    )
+
     return {"id": post.id, "message": "작성 완료"}
 
 
@@ -216,10 +238,3 @@ def toggle_bookmark(post_id: int, req: ReactionRequest, db: Session = Depends(ge
 
     db.commit()
     return {"bookmark_count": post.bookmark_count}
-
-
-# --- 여러 게시글 요약 일괄 조회 (북마크 목록 페이지용) ---
-@router.post("/batch")
-def get_posts_batch(ids: list[int], db: Session = Depends(get_db)):
-    rows = db.query(Post).filter(Post.id.in_(ids)).all()
-    return {"items": [to_summary(p) for p in rows]}
