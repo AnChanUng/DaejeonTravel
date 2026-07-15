@@ -15,9 +15,15 @@ def to_float(s):
 db = SessionLocal()
 data_dir = Path("data")
 
-for json_file in data_dir.glob("*.json"):
+# rglob: data/ 하위 폴더(대전_충청권 등)까지 전부 탐색
+for json_file in data_dir.rglob("*.json"):
+    # 코드표 등 items 없는 파일은 건너뜀
     with open(json_file, encoding="utf-8") as f:
         payload = json.load(f)
+
+    if not isinstance(payload, dict) or "items" not in payload:
+        print(f"{json_file.name}: items 없음, 건너뜀")
+        continue
 
     content_type = payload.get("contentType", json_file.stem)  # "관광지" 등
     items = payload.get("items", [])
