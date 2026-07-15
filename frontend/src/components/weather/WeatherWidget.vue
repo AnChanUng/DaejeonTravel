@@ -49,6 +49,7 @@ function gradeClass(grade) {
 </template>
 
 <style scoped>
+/* 메인 '오늘의 대전 여행 날씨' 카드와 동일 계열 */
 .weather-card {
   width: min(1100px, calc(100% - 40px));
   margin: 24px auto 40px;
@@ -61,23 +62,31 @@ function gradeClass(grade) {
   box-shadow: var(--shadow-small);
 }
 
+
 h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 800;
   color: var(--color-brown-900);
+  color: var(--color-brown-900);
 }
 
+
 .sub {
+  margin-top: 4px;
   margin-top: 4px;
   margin-bottom: 16px;
   font-size: 13px;
   color: var(--color-brown-500);
+  font-size: 13px;
+  color: var(--color-brown-500);
 }
+
 
 .loading {
   padding: 20px 0;
   text-align: center;
+  color: var(--color-brown-500);
   color: var(--color-brown-500);
 }
 
@@ -86,6 +95,7 @@ h2 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
+
 
 .region-item {
   min-width: 0;
@@ -99,22 +109,29 @@ h2 {
   border-radius: 16px;
 }
 
+
 .region-name {
   font-size: 13px;
   font-weight: 700;
   color: var(--color-brown-500);
+  color: var(--color-brown-500);
 }
+
 
 .temp {
   font-size: 26px;
   font-weight: 800;
   color: var(--color-brown-900);
+  color: var(--color-brown-900);
 }
+
 
 .desc {
   font-size: 13px;
   color: var(--color-brown-700);
+  color: var(--color-brown-700);
 }
+
 
 .travel {
   width: fit-content;
@@ -126,20 +143,26 @@ h2 {
   font-weight: 700;
 }
 
+
 .travel.good {
   color: #1b8f5a;
   background: #e6f6ee;
 }
+
 
 .travel.soso {
   color: #b7791f;
   background: #fdf3e1;
 }
 
+
 .travel.bad {
   color: #c0392b;
   background: #fdeeee;
+  color: #c0392b;
+  background: #fdeeee;
 }
+
 
 .comment {
   margin: 4px 0 0;
