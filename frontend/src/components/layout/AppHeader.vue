@@ -70,6 +70,20 @@ const selectLanguage = (languageCode) => {
         >
           커뮤니티
         </RouterLink>
+
+        <RouterLink
+          to="/map"
+          active-class="app-header__link--active"
+        >
+          여행 지도
+        </RouterLink>
+
+        <RouterLink
+          to="/dashboard"
+          active-class="app-header__link--active"
+        >
+          대시보드
+        </RouterLink>
       </nav>
 
       <div class="app-header__language">
@@ -158,11 +172,12 @@ const selectLanguage = (languageCode) => {
   backdrop-filter: blur(10px);
 }
 
+/* 메뉴가 8개로 늘어나 언어 버튼과 겹치지 않도록 간격을 조금 줄임 */
 .app-header__navigation {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(24px, 3vw, 52px);
+  gap: clamp(20px, 2.4vw, 42px);
 }
 
 .app-header__navigation a {
@@ -275,9 +290,9 @@ const selectLanguage = (languageCode) => {
   cursor: pointer;
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1250px) {
   .app-header__navigation {
-    gap: 22px;
+    gap: 20px;
   }
 
   .app-header__navigation a {
