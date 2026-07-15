@@ -1,160 +1,49 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
 import {
   onlineCount,
   connected,
-  notices,
-  removeNotice,
   connectRealtime,
   disconnectRealtime,
 } from '../../composables/useRealtime'
 
-const router = useRouter()
-
-function goPost(notice) {
-  removeNotice(notice.id)
-  router.push(`/community/${notice.postId}`)
-}
-
+// 앱 전체에서 WebSocket 연결을 여기서 한 번만 열고 닫는다.
+// (새 게시글 알림은 헤더의 NotificationBell이 같은 연결 상태를 함께 사용)
 onMounted(connectRealtime)
 onBeforeUnmount(disconnectRealtime)
 </script>
 
 <template>
-  <div class="realtime">
+  <div class="online" :class="{ 'online--off': !connected }">
+    <span class="online__dot"></span>
 
-    <!-- 새 게시글 알림 -->
-    <TransitionGroup name="toast" tag="div" class="realtime__toasts">
-      <button
-        v-for="notice in notices"
-        :key="notice.id"
-        class="toast"
-        @click="goPost(notice)"
-      >
-        <span class="toast__icon">🔔</span>
+    <span v-if="connected">
+      지금 <strong>{{ onlineCount }}</strong>명 접속 중
+    </span>
 
-        <span class="toast__body">
-          <span class="toast__label">
-            새 글 · {{ notice.category }}
-          </span>
-
-          <span class="toast__title">
-            {{ notice.title }}
-          </span>
-        </span>
-
-        <span
-          class="toast__close"
-          @click.stop="removeNotice(notice.id)"
-        >
-          ×
-        </span>
-      </button>
-    </TransitionGroup>
-
-    <!-- 접속자 현황 -->
-    <div class="online" :class="{ 'online--off': !connected }">
-      <span class="online__dot"></span>
-
-      <span v-if="connected">
-        지금 <strong>{{ onlineCount }}</strong>명 접속 중
-      </span>
-
-      <span v-else>
-        연결 중...
-      </span>
-    </div>
-
+    <span v-else>
+      연결 중...
+    </span>
   </div>
 </template>
 
 <style scoped>
-/* 챗봇 버튼이 오른쪽 아래에 있어 왼쪽 아래에 배치 */
-.realtime {
+/*
+  오른쪽 아래 '챗봇에게 물어보기' 버튼과 같은 높이에 오도록 맞춤.
+  (챗봇 버튼: bottom 24px / 높이 약 62px → 중앙 정렬 기준 38px)
+  챗봇 버튼 위치를 바꾸면 아래 bottom 값도 같이 조정할 것.
+*/
+.online {
   position: fixed;
-  bottom: 24px;
+  bottom: 38px;
   left: 24px;
   z-index: 90;
 
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.realtime__toasts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* 새 글 토스트 */
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  width: 290px;
-  padding: 12px 14px;
-
-  background: var(--color-cream-100);
-  border: 1px solid #e5c085;
-  border-radius: 16px;
-  box-shadow: var(--shadow-medium);
-
-  cursor: pointer;
-  text-align: left;
-  transition: transform 0.15s ease;
-}
-
-.toast:hover {
-  transform: translateY(-2px);
-}
-
-.toast__icon {
-  flex-shrink: 0;
-  font-size: 18px;
-}
-
-.toast__body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.toast__label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-brown-500);
-}
-
-.toast__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-brown-900);
-
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.toast__close {
-  flex-shrink: 0;
-  padding: 0 2px;
-  color: var(--color-brown-500);
-  font-size: 17px;
-}
-
-/* 접속자 배지 */
-.online {
-  display: flex;
   align-items: center;
   gap: 7px;
 
-  padding: 7px 14px;
+  padding: 9px 16px;
 
   background: rgba(255, 253, 248, 0.94);
   border: 1px solid #ddc49e;
@@ -195,30 +84,12 @@ onBeforeUnmount(disconnectRealtime)
   }
 }
 
-/* 토스트 등장 / 퇴장 */
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
 @media (max-width: 520px) {
-  .realtime {
-    bottom: 16px;
+  .online {
+    bottom: 20px;
     left: 16px;
-  }
-
-  .toast {
-    width: 240px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }
 </style>

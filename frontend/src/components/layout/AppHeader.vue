@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-
+import NotificationBell from './NotificationBell.vue'
 
 const { locale } = useI18n()
 
@@ -108,54 +108,59 @@ const selectLanguage = (languageCode) => {
         </RouterLink>
       </nav>
 
-      <div class="app-header__language">
-        <button
-          type="button"
-          class="app-header__language-button"
-          :aria-expanded="languageMenuOpen"
-          @click="toggleLanguageMenu"
-        >
-          <span
-            class="app-header__language-icon"
-            aria-hidden="true"
-          >
-            🌐
-          </span>
+      <!-- 오른쪽 영역: 알림 종 + 언어 선택 -->
+      <div class="app-header__actions">
+        <NotificationBell />
 
-          <span>
-            {{ currentLanguage }}
-          </span>
-
-          <span
-            class="app-header__language-arrow"
-            aria-hidden="true"
-          >
-            ▾
-          </span>
-        </button>
-
-        <div
-          v-if="languageMenuOpen"
-          class="app-header__language-menu"
-        >
+        <div class="app-header__language">
           <button
-            v-for="language in languages"
-            :key="language.code"
             type="button"
-            :class="{
-              'app-header__language-option--active':
-                currentLanguage === language.code
-            }"
-            @click="selectLanguage(language.code)"
+            class="app-header__language-button"
+            :aria-expanded="languageMenuOpen"
+            @click="toggleLanguageMenu"
           >
-            <span>
-              {{ language.code }}
+            <span
+              class="app-header__language-icon"
+              aria-hidden="true"
+            >
+              🌐
             </span>
 
             <span>
-              {{ language.label }}
+              {{ currentLanguage }}
+            </span>
+
+            <span
+              class="app-header__language-arrow"
+              aria-hidden="true"
+            >
+              ▾
             </span>
           </button>
+
+          <div
+            v-if="languageMenuOpen"
+            class="app-header__language-menu"
+          >
+            <button
+              v-for="language in languages"
+              :key="language.code"
+              type="button"
+              :class="{
+                'app-header__language-option--active':
+                  currentLanguage === language.code
+              }"
+              @click="selectLanguage(language.code)"
+            >
+              <span>
+                {{ language.code }}
+              </span>
+
+              <span>
+                {{ language.label }}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -240,11 +245,20 @@ const selectLanguage = (languageCode) => {
   font-weight: 800;
 }
 
-.app-header__language {
+/* 알림 종 + 언어 선택을 나란히 배치 */
+.app-header__actions {
   position: absolute;
   top: 50%;
   right: 32px;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 언어 드롭다운의 기준점 역할만 담당 */
+.app-header__language {
+  position: relative;
 }
 
 .app-header__language-button {
@@ -346,8 +360,9 @@ const selectLanguage = (languageCode) => {
     min-height: 66px;
   }
 
-  .app-header__language {
+  .app-header__actions {
     right: 16px;
+    gap: 6px;
   }
 
   .app-header__language-button {

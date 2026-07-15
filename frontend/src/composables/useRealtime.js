@@ -1,16 +1,106 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
-// 앱 전체에서 연결을 하나만 사용하기 위해
+// 앱 전체에서 연결과 알림 목록을 하나만 사용하기 위해
 // 상태를 모듈 바깥(전역)에 둔다.
 export const onlineCount = ref(0);
 export const connected = ref(false);
-export const notices = ref([]);
+export const notifications = ref([]);
+
+export const unreadCount = computed(
+  () => notifications.value.filter((n) => !n.read).length,
+);
+
+const STORAGE_KEY = "board:notifications";
+const MAX_KEEP = 20;
 
 let socket = null;
 let retryTimer = null;
 let pingTimer = null;
 let retryDelay = 1000; // 재연결 대기 시간 (실패할수록 늘어남)
-let noticeSeq = 0;
+let baseTitle = "";
+let titleWatching = false;
+
+/* ---------------- 저장 / 불러오기 ---------------- */
+// 새로고침해도 알림이 사라지지 않도록 브라우저에 보관한다.
+
+function loadStored() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    notifications.value = raw ? JSON.parse(raw) : [];
+  } catch {
+    notifications.value = [];
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(notifications.value.slice(0, MAX_KEEP)),
+    );
+  } catch {
+    // 저장 공간이 없어도 알림 기능 자체는 계속 동작해야 하므로 무시
+  }
+}
+
+/* ---------------- 탭 제목 배지 ---------------- */
+// 사용자가 다른 탭을 보고 있을 때 제목을 "(2) 원래제목" 으로 바꿔
+// 새 알림이 왔다는 걸 알려준다.
+
+function applyTitle() {
+  if (!baseTitle) return;
+
+  const count = unreadCount.value;
+
+  document.title =
+    document.hidden && count > 0 ? `(${count}) ${baseTitle}` : baseTitle;
+}
+
+function watchTitle() {
+  if (titleWatching) return;
+
+  titleWatching = true;
+  baseTitle = document.title;
+
+  document.addEventListener("visibilitychange", applyTitle);
+}
+
+/* ---------------- 알림 조작 ---------------- */
+
+export function markAllRead() {
+  notifications.value = notifications.value.map((n) => ({ ...n, read: true }));
+  save();
+  applyTitle();
+}
+
+export function removeNotification(id) {
+  notifications.value = notifications.value.filter((n) => n.id !== id);
+  save();
+  applyTitle();
+}
+
+export function clearNotifications() {
+  notifications.value = [];
+  save();
+  applyTitle();
+}
+
+function addNotification(payload) {
+  notifications.value = [
+    {
+      id: `${payload.postId}-${Date.now()}`,
+      ...payload,
+      at: new Date().toISOString(),
+      read: false,
+    },
+    ...notifications.value,
+  ].slice(0, MAX_KEEP);
+
+  save();
+  applyTitle();
+}
+
+/* ---------------- WebSocket ---------------- */
 
 function buildWebSocketUrl() {
   const base = import.meta.env.VITE_API_BASE_URL;
@@ -23,22 +113,6 @@ function buildWebSocketUrl() {
   // 로컬 개발: vite 프록시를 통해 백엔드로 연결
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${location.host}/ws`;
-}
-
-function pushNotice(notice) {
-  const id = ++noticeSeq;
-
-  notices.value.push({
-    id,
-    ...notice,
-  });
-
-  // 6초 뒤 자동으로 사라짐
-  setTimeout(() => removeNotice(id), 6000);
-}
-
-export function removeNotice(id) {
-  notices.value = notices.value.filter((n) => n.id !== id);
 }
 
 function handleMessage(event) {
@@ -56,8 +130,7 @@ function handleMessage(event) {
   }
 
   if (data.type === "new_post") {
-    pushNotice({
-      type: "new_post",
+    addNotification({
       postId: data.post.id,
       title: data.post.title,
       category: data.post.category,
@@ -66,6 +139,9 @@ function handleMessage(event) {
 }
 
 export function connectRealtime() {
+  loadStored();
+  watchTitle();
+
   // 이미 연결돼 있으면 다시 만들지 않는다.
   if (socket && socket.readyState <= WebSocket.OPEN) {
     return;
@@ -92,7 +168,7 @@ export function connectRealtime() {
     onlineCount.value = 0;
     clearInterval(pingTimer);
 
-    // 서버가 재시작되는 경우 등을 대비해 자동으로 다시 연결한다.
+    // 서버 재시작 등에 대비해 자동으로 다시 연결한다.
     // 실패가 반복되면 대기 시간을 늘려 서버 부담을 줄인다. (최대 15초)
     clearTimeout(retryTimer);
     retryTimer = setTimeout(connectRealtime, retryDelay);
@@ -115,4 +191,19 @@ export function disconnectRealtime() {
   }
 
   connected.value = false;
+}
+
+/* ---------------- 표시용 유틸 ---------------- */
+
+export function timeAgo(isoString) {
+  const diff = Date.now() - new Date(isoString).getTime();
+  const minutes = Math.floor(diff / 60000);
+
+  if (minutes < 1) return "방금 전";
+  if (minutes < 60) return `${minutes}분 전`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+
+  return `${Math.floor(hours / 24)}일 전`;
 }
