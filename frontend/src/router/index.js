@@ -11,6 +11,41 @@ import BoardBookmarks from "../views/BoardBookmarks.vue";
 import LocationListView from "../views/LocationListView.vue";
 import LocationDetailView from "../views/LocationDetailView.vue";
 import FestivalCalendarView from "../views/FestivalCalendarView.vue";
+import MapView from "../views/MapView.vue";
+import DashboardView from "../views/DashboardView.vue";
+
+const TemporaryView = {
+  template: `
+    <main style="
+      min-height: 100vh;
+      padding: 80px 20px;
+      text-align: center;
+      background: #fff9ed;
+    ">
+      <h1>페이지 준비 중입니다.</h1>
+
+      <p style="margin-top: 15px;">
+        현재는 메인 페이지를 먼저 구현하고 있습니다.
+      </p>
+
+      
+        href="/"
+        style="
+          display:inline-block;
+          margin-top:25px;
+          padding:10px 18px;
+          background:#e8a52a;
+          border-radius:999px;
+          color:#3f2819;
+          text-decoration:none;
+        "
+      >
+        메인으로 돌아가기
+      </a>
+
+    </main>
+  `,
+};
 
 const routes = [
   // 메인
@@ -69,12 +104,24 @@ const routes = [
     component: FestivalCalendarView,
   },
 
+  // 여행 지도 (핀 표시 + 경로 안내)
+  {
+    path: "/map",
+    name: "map",
+    component: MapView,
+  },
+
+  // 통계 대시보드
+  {
+    path: "/dashboard",
+    name: "dashboard",
+    component: DashboardView,
+  },
+
   // 검색
   {
     path: "/search",
-    name: "search",
-    component: LocationListView,
-    props: { type: "검색" },
+    component: TemporaryView,
   },
 
   // 커뮤니티
@@ -108,15 +155,6 @@ const routes = [
     path: "/community/:id/edit",
     name: "board-edit",
     component: BoardEdit,
-  },
-
-  // 구 /board 주소 호환용 리다이렉트
-  { path: "/board", redirect: "/community" },
-  { path: "/board/write", redirect: "/community/write" },
-  { path: "/board/:id", redirect: (to) => `/community/${to.params.id}` },
-  {
-    path: "/board/:id/edit",
-    redirect: (to) => `/community/${to.params.id}/edit`,
   },
 ];
 
