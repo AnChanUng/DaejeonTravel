@@ -7,6 +7,9 @@ import BoardDetail from "../views/BoardDetail.vue";
 import BoardWrite from "../views/BoardWrite.vue";
 import BoardEdit from "../views/BoardEdit.vue";
 
+import LocationListView from "../views/LocationListView.vue";
+import LocationDetailView from "../views/LocationDetailView.vue";
+
 const TemporaryView = {
   template: `
     <main style="
@@ -48,27 +51,46 @@ const routes = [
     component: HomeView,
   },
 
-  // 관광
+  // 관광지
   {
     path: "/tourist-spots",
-    component: TemporaryView,
+    name: "tourist-spots",
+    component: LocationListView,
+    props: { type: "관광지" },
   },
 
   {
     path: "/tourist-spots/:id",
-    component: TemporaryView,
+    name: "tourist-spot-detail",
+    component: LocationDetailView,
   },
 
   // 음식점
   {
     path: "/restaurants",
-    component: TemporaryView,
+    name: "restaurants",
+    component: LocationListView,
+    props: { type: "음식점" },
+  },
+
+  {
+    path: "/restaurants/:id",
+    name: "restaurant-detail",
+    component: LocationDetailView,
   },
 
   // 숙박
   {
     path: "/accommodations",
-    component: TemporaryView,
+    name: "accommodations",
+    component: LocationListView,
+    props: { type: "숙박" },
+  },
+
+  {
+    path: "/accommodations/:id",
+    name: "accommodation-detail",
+    component: LocationDetailView,
   },
 
   // 축제
@@ -86,22 +108,35 @@ const routes = [
   // 커뮤니티
   {
     path: "/community",
+    name: "board-list",
     component: BoardList,
   },
 
   {
     path: "/community/write",
+    name: "board-write",
     component: BoardWrite,
   },
 
   {
     path: "/community/:id",
+    name: "board-detail",
     component: BoardDetail,
   },
 
   {
     path: "/community/:id/edit",
+    name: "board-edit",
     component: BoardEdit,
+  },
+
+  // 구 /board 주소 호환용 리다이렉트
+  { path: "/board", redirect: "/community" },
+  { path: "/board/write", redirect: "/community/write" },
+  { path: "/board/:id", redirect: (to) => `/community/${to.params.id}` },
+  {
+    path: "/board/:id/edit",
+    redirect: (to) => `/community/${to.params.id}/edit`,
   },
 ];
 
