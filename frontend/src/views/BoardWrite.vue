@@ -1,6 +1,45 @@
+<script setup>
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '../api'
+import BaseButton from '../components/BaseButton.vue'
+import PageLayout from '../components/layout/PageLayout.vue'
+
+const router = useRouter()
+const submitting = ref(false)
+
+const form = reactive({
+  category: '관광지',
+  title: '',
+  content: '',
+  password: '',
+})
+
+async function submit() {
+  if (!form.title.trim()) return alert('제목을 입력해주세요')
+  if (!form.content.trim()) return alert('내용을 입력해주세요')
+  if (!form.password.trim()) return alert('비밀번호를 입력해주세요')
+
+  submitting.value = true
+  try {
+    const res = await api.post('/api/posts', form)
+    router.push(`/community/${res.data.id}`)
+  } catch {
+    alert('등록 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
 <template>
-  <div>
-    <h1>게시글 작성</h1>
+  <PageLayout>
+
+    <div class="board-head">
+      <span class="board-head__bread">✏️</span>
+      <h1>게시글 작성</h1>
+      <p>대전·충청 이야기를 들려주세요</p>
+    </div>
 
     <div class="form-card">
       <label>카테고리</label>
@@ -30,78 +69,87 @@
       <p class="hint">※ 게시글 수정·삭제 확인용으로 사용됩니다</p>
 
       <div class="btn-row">
-        <BaseButton variant="ghost" @click="$router.back()">취소</BaseButton>
-        <BaseButton @click="submit">등록</BaseButton>
+        <BaseButton variant="ghost" @click="router.back()">취소</BaseButton>
+        <BaseButton :disabled="submitting" @click="submit">
+          {{ submitting ? '등록 중...' : '등록' }}
+        </BaseButton>
       </div>
     </div>
-  </div>
+
+  </PageLayout>
 </template>
 
-<script setup>
-import { reactive } from "vue";
-import { useRouter } from "vue-router";
-import api from "../api";
-import BaseButton from "../components/BaseButton.vue";
-
-const router = useRouter();
-const form = reactive({
-  category: "관광지",
-  title: "",
-  content: "",
-  password: "",
-});
-
-async function submit() {
-  if (!form.title.trim()) return alert("제목을 입력해주세요");
-  if (!form.content.trim()) return alert("내용을 입력해주세요");
-  if (!form.password.trim()) return alert("비밀번호를 입력해주세요");
-
-  const res = await api.post("/api/posts", form);
-  router.push(`/board/${res.data.id}`);
-}
-</script>
-
 <style scoped>
-h1 {
-  font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 20px;
+.board-head {
+  text-align: center;
+  margin-bottom: 28px;
 }
+
+.board-head__bread {
+  font-size: 26px;
+}
+
+.board-head h1 {
+  margin-top: 4px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--color-brown-900);
+}
+
+.board-head p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-brown-500);
+}
+
 .form-card {
-  background: var(--color-card);
-  border-radius: var(--radius-lg);
-  padding: 28px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: var(--shadow-card);
+  padding: 32px;
+  background: var(--color-cream-100);
+  border: 1px solid #eed9b4;
+  border-radius: 20px;
+  box-shadow: var(--shadow-small);
 }
+
 label {
+  margin-top: 10px;
   font-size: 13px;
   font-weight: 700;
-  color: #4e5968;
-  margin-top: 10px;
+  color: var(--color-brown-700);
 }
+
 input,
 textarea,
 select {
-  padding: 14px 16px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  background: #fff;
+  border: 1.5px solid #dbb87e;
+  border-radius: 14px;
   font-size: 15px;
+  color: var(--color-brown-900);
   outline: none;
-  background: var(--color-card);
   resize: vertical;
 }
+
+input::placeholder,
+textarea::placeholder {
+  color: #b99b74;
+}
+
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-gold-500);
 }
+
 .hint {
   font-size: 12px;
-  color: var(--color-text-sub);
+  color: var(--color-brown-500);
 }
+
 .btn-row {
   display: flex;
   justify-content: flex-end;
