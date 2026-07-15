@@ -1,10 +1,42 @@
 import json
+import re
+
 from pathlib import Path
 
 from openai import OpenAI
 
 from config import settings
 from chatbot.prompt import SYSTEM_PROMPT
+
+# 검색에 방해되는 조사/의존명사/불용어
+STOPWORDS = {
+    "은", "는", "이", "가", "을", "를", "에", "에서", "의", "와", "과",
+    "도", "만", "로", "으로", "이랑", "랑", "한테", "께", "부터", "까지",
+    "좀", "알려줘", "추천해줘", "추천", "찾아줘", "뭐야", "뭐가", "있어",
+    "있나요", "있나", "어디", "어디야", "어디에", "어떤", "곳", "좋을까",
+    "싶어", "싶은데", "해줘", "줘", "요", "?", ".", ",", "!"
+}
+
+def extract_keywords(question: str) -> list[str]:
+    """
+    질문 문장에서 검색에 사용할 키워드를 추출한다.
+    - 특수문자 제거
+    - 공백 기준 분리
+    - 불용어 제거
+    - 2글자 미만 토큰(조사 등)은 버림
+    """
+    # 특수문자 제거 (한글, 영문, 숫자, 공백만 남김)
+    cleaned = re.sub(r"[^가-힣a-zA-Z0-9\s]", " ", question)
+
+    words = cleaned.split()
+
+    keywords = [
+        w for w in words
+        if w not in STOPWORDS and len(w) >= 2
+    ]
+
+    # 키워드가 하나도 안 걸리면 원본 단어라도 반환 (검색 결과 0건 방지)
+    return keywords if keywords else words
 
 
 client = OpenAI(api_key=settings.openai_api_key)
@@ -92,11 +124,11 @@ def build_context(results):
     for item in results:
         contexts.append(
             f"""
-이름: {item.get("title", "")}
-주소: {item.get("addr1", "")}
-소개: {item.get("overview", "")}
-전화번호: {item.get("tel", "")}
-""".strip()
+            이름: {item.get("title", "")}
+            주소: {item.get("addr1", "")}
+            소개: {item.get("overview", "")}
+            전화번호: {item.get("tel", "")}
+            """.strip()
         )
 
     return "\n\n".join(contexts)
@@ -121,12 +153,12 @@ def ask_chatbot(question: str):
             {
                 "role": "user",
                 "content": f"""
-질문:
-{question}
+                        질문:
+                        {question}
 
-참고 데이터:
-{context}
-""",
+                        참고 데이터:
+                        {context}
+                        """,
             },
         ],
     )
