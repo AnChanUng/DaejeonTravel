@@ -103,18 +103,18 @@ function addNotification(payload) {
 /* ---------------- WebSocket ---------------- */
 
 function buildWebSocketUrl() {
-  const base = import.meta.env.VITE_API_BASE_URL;
+  // 💡 환경 변수에서 가져온 값을 공백 제거하고 정제합니다.
+  const base = (import.meta.env.VITE_API_BASE_URL || "").trim();
 
-  // 배포 환경: http(s)://... → ws(s)://...
-  if (base) {
+  // 1. 만약 환경 변수가 제대로 설정되어 있고, 문자열 'VITE_API_BASE_URL'이 아니라 실제 주소인 경우
+  if (base && !base.includes("VITE_API_BASE_URL")) {
     return base.replace(/^http/, "ws") + "/ws";
   }
 
-  // 로컬 개발: vite 프록시를 통해 백엔드로 연결
-  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${location.host}/ws`;
+  // 2. 환경 변수가 비어있거나 꼬였을 때를 대비한 완전 안전 장치 (하드코딩 배포 주소)
+  // 이 주소로 확실하게 싱크를 맞춥니다.
+  return "wss://localhub-7ql5.onrender.com/ws";
 }
-
 function handleMessage(event) {
   let data;
 
