@@ -9,8 +9,10 @@ import kkumsuniImage from '@/assets/images/mascots/kkumsuni.png'
 import bakeryImage from '@/assets/images/backgrounds/bakery-left.png'
 import daejeonRightImage from '@/assets/images/backgrounds/daejeon-right.png'
 
+
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t } = useI18n()
+
 
 const keyword = ref('')
 const suggestions = ref([])
@@ -19,7 +21,9 @@ const searching = ref(false)
 const suggestionLoading = ref(false)
 const suggestionOpen = ref(false)
 
+
 let debounceTimer = null
+
 
 const routeNameMap = {
   '12': 'tourist-spot-detail',
@@ -32,6 +36,7 @@ const routeNameMap = {
   음식점: 'restaurant-detail'
 }
 
+
 const getContentType = (location) => {
   return String(
     location.content_type ??
@@ -41,6 +46,7 @@ const getContentType = (location) => {
     ''
   )
 }
+
 
 const getLocationId = (location) => {
   return (
@@ -52,25 +58,30 @@ const getLocationId = (location) => {
   )
 }
 
+
 const moveToDetail = async (location) => {
+
   const contentType = getContentType(location)
   const locationId = getLocationId(location)
+
   const routeName = routeNameMap[contentType]
 
+
   if (!routeName) {
-    searchError.value = '지원하지 않는 장소 유형입니다.'
-    console.error('알 수 없는 장소 유형:', location)
+    searchError.value = t('search.unsupported')
     return
   }
 
+
   if (!locationId) {
-    searchError.value = '장소 상세 정보를 확인할 수 없습니다.'
-    console.error('장소 ID가 없습니다:', location)
+    searchError.value = t('search.noDetail')
     return
   }
+
 
   suggestionOpen.value = false
   suggestions.value = []
+
 
   await router.push({
     name: routeName,
@@ -80,79 +91,174 @@ const moveToDetail = async (location) => {
   })
 }
 
+
+
 const handleSearch = async () => {
+
   const value = keyword.value.trim()
 
-      <h1
-        :class="{ english: locale === 'en' }"
-      >
-        {{ t('hero.title') }}
-      </h1>
+  if (!value) {
+    return
+  }
 
-      <p>
-        {{ t('hero.description') }}
-      </p>
+
+  try {
+
+    const response = await api.get(
+      '/api/locations/suggestions',
+      {
+        params: {
+          keyword: value,
+          limit: 1
+        }
+      }
+    )
+
+
+    const location = response.data.items?.[0]
+
+
+    if (location) {
+
+      await moveToDetail(location)
+
+      return
+    }
+
+
+    // 검색 결과가 없으면 검색 페이지 이동
+    await router.push({
+      path: '/search',
+      query: {
+        keyword: value
+      }
+    })
+
+
+  } catch(error) {
+
+    console.error(
+      '검색 실패:',
+      error
+    )
+
+  }
+
+}
+
+
 
 const selectSuggestion = async (location) => {
-  keyword.value = location.title ?? location.name ?? ''
+
+  keyword.value =
+    location.title ??
+    location.name ??
+    ''
+
   searchError.value = ''
 
   await moveToDetail(location)
 }
 
+
+
+const openSuggestions = () => {
+
+  if (suggestions.value.length > 0) {
+    suggestionOpen.value = true
+  }
+
+}
+
+
+
 const closeSuggestions = () => {
+
   window.setTimeout(() => {
     suggestionOpen.value = false
   }, 150)
+
 }
 
-        <input
-          v-model="keyword"
-          type="search"
-          :placeholder="t('hero.placeholder')"
-        />
+
 
 watch(keyword, (newKeyword) => {
+
   window.clearTimeout(debounceTimer)
 
   searchError.value = ''
 
+
   const value = newKeyword.trim()
 
+
   if (!value) {
+
     suggestions.value = []
     suggestionOpen.value = false
     suggestionLoading.value = false
+
     return
   }
 
+
   debounceTimer = window.setTimeout(async () => {
+
+
     suggestionLoading.value = true
 
-    try {
-      const response = await api.get('/api/locations/suggestions', {
-        params: {
-          keyword: value,
-          limit: 5
-        }
-      })
 
-      suggestions.value = response.data.items ?? []
+    try {
+
+      const response = await api.get(
+        '/api/locations/suggestions',
+        {
+          params: {
+            keyword: value,
+            limit: 5
+          }
+        }
+      )
+
+
+      suggestions.value =
+        response.data.items ?? []
+
+
       suggestionOpen.value = true
-    } catch (error) {
+
+
+    } catch(error) {
+
+
       suggestions.value = []
       suggestionOpen.value = false
 
-      console.error('검색어 추천 조회 실패:', error)
+      console.error(
+        '검색어 추천 조회 실패:',
+        error
+      )
+
+
     } finally {
+
       suggestionLoading.value = false
+
     }
+
+
   }, 300)
+
 })
 
+
+
 onUnmounted(() => {
+
   window.clearTimeout(debounceTimer)
+
 })
+
 </script>
 
 <template>
@@ -179,11 +285,11 @@ onUnmounted(() => {
         </span>
 
         <h1>
-          대전의 맛과 여행을 한눈에
+          {{ t('hero.title') }}
         </h1>
 
         <p>
-          관광지, 음식점, 숙박 정보를 쉽고 빠르게 찾아보세요!
+          {{ t('hero.description') }}
         </p>
 
         <div class="hero-section__search-wrapper">
@@ -195,8 +301,8 @@ onUnmounted(() => {
               v-model="keyword"
               type="search"
               autocomplete="off"
-              placeholder="장소 이름을 검색해보세요. 예: 한밭수목원, 유성온천"
-              aria-label="장소 이름 검색"
+              :placeholder="t('hero.placeholder')"
+              :aria-label="t('hero.placeholder')"
               @focus="openSuggestions"
               @blur="closeSuggestions"
             />
