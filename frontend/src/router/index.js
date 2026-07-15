@@ -9,6 +9,7 @@ import BoardEdit from "../views/BoardEdit.vue";
 
 import LocationListView from "../views/LocationListView.vue";
 import LocationDetailView from "../views/LocationDetailView.vue";
+import FestivalCalendarView from "../views/FestivalCalendarView.vue";
 
 const TemporaryView = {
   template: `
@@ -93,10 +94,11 @@ const routes = [
     component: LocationDetailView,
   },
 
-  // 축제
+  // 축제 캘린더
   {
     path: "/festivals",
-    component: TemporaryView,
+    name: "festivals",
+    component: FestivalCalendarView,
   },
 
   // 검색
