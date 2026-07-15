@@ -6,6 +6,7 @@ import BoardList from "../views/BoardList.vue";
 import BoardDetail from "../views/BoardDetail.vue";
 import BoardWrite from "../views/BoardWrite.vue";
 import BoardEdit from "../views/BoardEdit.vue";
+import BoardBookmarks from "../views/BoardBookmarks.vue";
 
 import LocationListView from "../views/LocationListView.vue";
 import LocationDetailView from "../views/LocationDetailView.vue";
@@ -118,6 +119,14 @@ const routes = [
     path: "/community/write",
     name: "board-write",
     component: BoardWrite,
+  },
+
+  // 주의: 동적 라우트(/community/:id)보다 반드시 위에 있어야
+  // "bookmarks"가 게시글 id로 오인되지 않는다.
+  {
+    path: "/community/bookmarks",
+    name: "board-bookmarks",
+    component: BoardBookmarks,
   },
 
   {

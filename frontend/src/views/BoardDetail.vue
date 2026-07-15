@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../api'
 import BaseButton from '../components/BaseButton.vue'
 import PageLayout from '../components/layout/PageLayout.vue'
+import { isLiked, isBookmarked, setLiked, setBookmarked } from '../utils/postReactions'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,12 +16,54 @@ const mode = ref('')
 const password = ref('')
 const errorMsg = ref('')
 
+const liked = ref(false)
+const bookmarked = ref(false)
+const reacting = ref(false)
+
 async function fetchPost() {
   try {
     const res = await api.get(`/api/posts/${route.params.id}`)
     post.value = res.data
+    liked.value = isLiked(post.value.id)
+    bookmarked.value = isBookmarked(post.value.id)
   } catch {
     notFound.value = true
+  }
+}
+
+async function toggleLike() {
+  if (reacting.value) return
+  reacting.value = true
+  const next = !liked.value
+  try {
+    const res = await api.post(`/api/posts/${post.value.id}/like`, {
+      action: next ? 'like' : 'unlike',
+    })
+    post.value.like_count = res.data.like_count
+    liked.value = next
+    setLiked(post.value.id, next)
+  } catch {
+    alert('잠시 후 다시 시도해주세요')
+  } finally {
+    reacting.value = false
+  }
+}
+
+async function toggleBookmark() {
+  if (reacting.value) return
+  reacting.value = true
+  const next = !bookmarked.value
+  try {
+    const res = await api.post(`/api/posts/${post.value.id}/bookmark`, {
+      action: next ? 'bookmark' : 'unbookmark',
+    })
+    post.value.bookmark_count = res.data.bookmark_count
+    bookmarked.value = next
+    setBookmarked(post.value.id, next)
+  } catch {
+    alert('잠시 후 다시 시도해주세요')
+  } finally {
+    reacting.value = false
   }
 }
 
@@ -77,9 +120,39 @@ onMounted(fetchPost)
       <div class="detail-card">
         <span class="badge">{{ post.category }}</span>
         <h1>{{ post.title }}</h1>
-        <p class="date">{{ formatDate(post.created_at) }}</p>
+
+        <div class="meta-row">
+          <span class="meta-date">{{ formatDate(post.created_at) }}</span>
+          <span class="meta-stat">👁 조회 {{ post.view_count }}</span>
+        </div>
+
+        <div v-if="post.tags?.length" class="tag-row">
+          <span v-for="t in post.tags" :key="t" class="tag-chip">#{{ t }}</span>
+        </div>
+
+        <img v-if="post.image" :src="post.image" class="detail-image" :alt="post.title" />
+
         <hr />
         <p class="content">{{ post.content }}</p>
+
+        <div class="reaction-row">
+          <button
+            class="reaction-btn"
+            :class="{ active: liked }"
+            :disabled="reacting"
+            @click="toggleLike"
+          >
+            {{ liked ? '❤️' : '🤍' }} 좋아요 {{ post.like_count }}
+          </button>
+          <button
+            class="reaction-btn"
+            :class="{ active: bookmarked }"
+            :disabled="reacting"
+            @click="toggleBookmark"
+          >
+            {{ bookmarked ? '🔖' : '📑' }} 북마크 {{ post.bookmark_count }}
+          </button>
+        </div>
       </div>
 
       <div class="btn-row">
@@ -154,10 +227,38 @@ h1 {
   color: var(--color-brown-900);
 }
 
-.date {
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-top: 8px;
   font-size: 13px;
   color: var(--color-brown-500);
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tag-chip {
+  padding: 3px 10px;
+  background: #fffaf0;
+  border: 1px solid #f0deba;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-brown-700);
+}
+
+.detail-image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-top: 16px;
 }
 
 hr {
@@ -171,6 +272,42 @@ hr {
   line-height: 1.8;
   color: var(--color-brown-800);
   white-space: pre-wrap;
+}
+
+/* 좋아요 / 북마크 버튼 */
+.reaction-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0deba;
+}
+
+.reaction-btn {
+  padding: 10px 18px;
+  background: #fffaf0;
+  border: 1.5px solid #e5c085;
+  border-radius: 999px;
+  color: var(--color-brown-700);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reaction-btn:hover:not(:disabled) {
+  background: var(--color-cream-300);
+}
+
+.reaction-btn.active {
+  background: var(--color-gold-300);
+  border-color: var(--color-gold-500);
+  color: var(--color-brown-900);
+}
+
+.reaction-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .btn-row {
@@ -192,7 +329,6 @@ hr {
   color: var(--color-brown-500);
 }
 
-/* 모달 */
 .modal-bg {
   position: fixed;
   inset: 0;
