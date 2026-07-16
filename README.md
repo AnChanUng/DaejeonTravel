@@ -1,4 +1,4 @@
-# 🥐 대전이야기 (LocalHub)
+# 🥐 대전이야기
 
 > 공공데이터 기반 대전·충청 지역 정보 공유 커뮤니티
 
@@ -57,20 +57,13 @@
 ### 1. 백엔드
 ```bash
 cd backend
-python -m venv .venv
-source .venv/Scripts/activate        # Windows Git Bash
-pip install -r requirements.txt
-
-cp .env.example .env                 # GEMINI_API_KEY 등 입력
-python migrate_add_board_features.py # DB 컬럼 마이그레이션 (최초 1회)
-
+source .venv/Scripts/activate        
 uvicorn main:app --reload --port 8000
 ```
 
 ### 2. 프론트엔드
 ```bash
 cd frontend
-npm install
 npm run dev                          # http://localhost:5173
 ```
 
