@@ -1,5 +1,6 @@
 import json
 import re
+import copy
 
 from google import genai
 from pathlib import Path
@@ -12,7 +13,8 @@ STOPWORDS = {
     "도", "만", "로", "으로", "이랑", "랑", "한테", "께", "부터", "까지",
     "좀", "알려줘", "추천해줘", "추천", "찾아줘", "뭐야", "뭐가", "있어",
     "있나요", "있나", "어디", "어디야", "어디에", "어떤", "곳", "좋을까",
-    "싶어", "싶은데", "해줘", "줘", "요", "?", ".", ",", "!"
+    "싶어", "싶은데", "해줘", "줘", "요", "추천", "알려줘", "찾아줘", "좋은",
+    "있어", "가고싶어", "갈만한", "어디", "?", ".", ",", "!"
 }
 
 LOCATION_ALIAS = {
@@ -90,20 +92,36 @@ def replace_location_alias(question: str) -> str:
 
     return question
 
-def select_dataset(question: str):
-    question = question.strip()
+def select_datasets(question: str):
+    datasets = []
 
+    # 숙소
     if any(keyword in question for keyword in [
-        "음식", "맛집", "식당", "카페", "먹을", "밥"
+        "숙소", "호텔", "모텔", "펜션", "게스트하우스", "숙박"
     ]):
-        return "음식점"
+        datasets.append("숙박")
 
+
+    # 음식점
     if any(keyword in question for keyword in [
-        "숙박", "호텔", "펜션", "모텔", "게스트하우스", "숙소", "숙박시설"
+        "음식점", "먹거리", "음식", "맛집", "식당", "카페", "먹을", "밥"
     ]):
-        return "숙박"
+        datasets.append("음식점")
 
-    return "관광지"
+
+    # 관광지
+    if any(keyword in question for keyword in [
+        "관광", "관광지", "명소", "볼거리", "여행지", "가볼만한곳",
+        "놀거리", "데이트", "산책", "공원", "전시", "박물관", "체험"
+    ]):
+        datasets.append("관광지")
+
+    # 키워드가 없으면 전체 검색
+    if not datasets:
+        datasets = ["숙박", "음식점", "관광지"]
+
+    return datasets
+
 
 def search_data(dataset: str, question: str, limit=5):
     items = DATA[dataset]["items"]
@@ -113,25 +131,22 @@ def search_data(dataset: str, question: str, limit=5):
     scored = []
 
     for item in items:
-
         score = 0
-
         title = str(item.get("title", ""))
         addr = str(item.get("addr1", ""))
         overview = str(item.get("overview", ""))
 
         for keyword in keywords:
-
             if keyword in title:
                 score += 5
-
             if keyword in addr:
                 score += 4
-
             if keyword in overview:
                 score += 1
 
         if score > 0:
+            new_item = copy.deepcopy(item)
+            new_item["category"] = dataset
             scored.append((score, item))
 
     scored.sort(reverse=True, key=lambda x: x[0])
@@ -139,7 +154,15 @@ def search_data(dataset: str, question: str, limit=5):
     if scored:
         return [item for _, item in scored[:limit]]
     
-    return items[:limit]
+    # 검색 결과가 없을 경우 기본 추천
+    default_items = []
+    for item in items[:limit]:
+        new_item = copy.deepcopy(item)
+        new_item["category"] = dataset
+        default_items.append(new_item)
+
+    return default_items
+    # return items[:limit]
 
 def build_context(results):
     """
@@ -154,6 +177,7 @@ def build_context(results):
     for item in results:
         contexts.append(
             f"""
+            카테고리: {item.get("category", "")}
             이름: {item.get("title", "")}
             주소: {item.get("addr1", "")}
             소개: {item.get("overview", "")}
@@ -187,6 +211,27 @@ def build_prompt(question: str, context: str) -> str:
             - 없는 정보는 추측하지 않는다.
             - 필요한 경우 목록 형태로 정리한다.
             - 자연스럽고 친절한 한국어로 답변한다.
+            - 사용자가 요청한 카테고리만 답변한다.
+            - 요청하지 않은 카테고리는 언급하지 않는다.
+            - 요청한 카테고리 중 참고 데이터가 없는 경우에만 데이터가 없다고 표시한다.
+            - 숙소, 음식점, 관광지 등 여러 카테고리를 요청하면 각각 구분해서 작성한다.
+
+            답변 형식 예시:
+
+            ## 숙소 추천
+            - 이름:
+            - 주소:
+            - 소개:
+
+            ## 음식점 추천
+            - 이름:
+            - 주소:
+            - 소개:
+
+            ## 관광지 추천
+            - 이름:
+            - 주소:
+            - 소개:
             """
 
 def ask_chatbot(question: str):
@@ -201,9 +246,17 @@ def ask_chatbot(question: str):
 
     search_question = replace_location_alias(question)
 
-    dataset = select_dataset(search_question)
+    datasets = select_datasets(search_question)
 
-    results = search_data(dataset, search_question)
+    results = []
+
+    for dataset in datasets:
+        data = search_data(dataset, search_question)
+
+        for item in data:
+            item["category"] = dataset
+
+        results.extend(data)
 
     if not results:
         return "제공된 데이터에서 관련 정보를 찾을 수 없습니다."
@@ -217,8 +270,9 @@ def ask_chatbot(question: str):
             model="models/gemini-3.1-flash-lite",
             contents=prompt,
         )
+        '''hasattr(response, "text") and '''
 
-        if hasattr(response, "text") and response.text:
+        if response.text: 
             return response.text
 
         return str(response)
