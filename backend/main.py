@@ -5,8 +5,12 @@ from fastapi.staticfiles import StaticFiles
 from config import settings
 from database import engine, Base
 from models import Post
+<<<<<<< Updated upstream
 from routers import posts, weather, locations, festivals, stats, ws
 from routers import chat
+=======
+from routers import posts, weather, locations, festivals, stats, ws, chat
+>>>>>>> Stashed changes
 
 Base.metadata.create_all(bind=engine)   # posts 테이블 없으면 생성
 
@@ -30,7 +34,12 @@ app.include_router(locations.router)
 app.include_router(festivals.router)
 app.include_router(stats.router)
 app.include_router(ws.router)   # WebSocket 실시간 알림 (/ws)
+<<<<<<< Updated upstream
 app.include_router(chat.router)  # 챗봇 (/chat)
+=======
+app.include_router(chat.router)
+
+>>>>>>> Stashed changes
 
 @app.get("/")
 def root():
